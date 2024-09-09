@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.io.BufferedReader;
@@ -23,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
     private GameAdapter gameAdapter;
     private ActivityResultLauncher<Intent> filePickerLauncher;
+    private SearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
         gameAdapter = new GameAdapter();
         recyclerView.setAdapter(gameAdapter);
 
+        searchView = findViewById(R.id.searchView);
+
         // Try to load saved data from internal storage
         loadJsonFromInternalStorage();
 
@@ -45,6 +49,20 @@ public class MainActivity extends AppCompatActivity {
             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                 Uri uri = result.getData().getData();
                 readJsonFromUri(uri);
+            }
+        });
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                gameAdapter.filter(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                gameAdapter.filter(newText);
+                return true;
             }
         });
     }

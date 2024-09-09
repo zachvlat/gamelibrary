@@ -12,6 +12,11 @@ import java.util.List;
 public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder> {
 
     private List<Game> games = new ArrayList<>();
+    private List<Game> filteredGames = new ArrayList<>();
+
+    public GameAdapter() {
+        this.filteredGames = new ArrayList<>();
+    }
 
     @NonNull
     @Override
@@ -23,7 +28,7 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull GameViewHolder holder, int position) {
-        Game game = games.get(position);
+        Game game = filteredGames.get(position);
         holder.tvName.setText(game.getName());
         holder.tvGenres.setText("Genres: " + (game.getGenres().isEmpty() ? "N/A" : game.getGenres()));
         holder.tvSources.setText("Sources: " + game.getSources());
@@ -32,11 +37,27 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
 
     @Override
     public int getItemCount() {
-        return games.size();
+        return filteredGames.size();
     }
 
     public void setGames(List<Game> games) {
-        this.games = games;
+        this.games = new ArrayList<>(games);
+        this.filteredGames = new ArrayList<>(games);
+        notifyDataSetChanged();
+    }
+
+    public void filter(String query) {
+        filteredGames.clear();
+        if (query.isEmpty()) {
+            filteredGames.addAll(games);
+        } else {
+            String lowerCaseQuery = query.toLowerCase();
+            for (Game game : games) {
+                if (game.getName().toLowerCase().contains(lowerCaseQuery)) {
+                    filteredGames.add(game);
+                }
+            }
+        }
         notifyDataSetChanged();
     }
 
