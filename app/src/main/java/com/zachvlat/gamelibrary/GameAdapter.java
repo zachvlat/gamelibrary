@@ -16,15 +16,18 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
     @NonNull
     @Override
     public GameViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_2, parent, false);
+        // Inflate the item_game.xml layout for each item in the list
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_game, parent, false);
         return new GameViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull GameViewHolder holder, int position) {
         Game game = games.get(position);
-        holder.titleTextView.setText(game.getName());
-//        holder.detailTextView.setText(game.getDescription());
+        holder.tvName.setText(game.getName());
+        holder.tvGenres.setText("Genres: " + (game.getGenres().isEmpty() ? "N/A" : game.getGenres()));
+        holder.tvSources.setText("Sources: " + game.getSources());
+        holder.tvCriticScore.setText("Critic Score: " + (game.getCriticScore().isEmpty() ? "N/A" : game.getCriticScore()));
     }
 
     @Override
@@ -38,13 +41,16 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
     }
 
     static class GameViewHolder extends RecyclerView.ViewHolder {
-        TextView titleTextView;
-        TextView detailTextView;
 
-        GameViewHolder(View itemView) {
+        TextView tvName, tvGenres, tvSources, tvCriticScore;
+
+        public GameViewHolder(@NonNull View itemView) {
             super(itemView);
-            titleTextView = itemView.findViewById(android.R.id.text1);
-            detailTextView = itemView.findViewById(android.R.id.text2);
+            // Find the views from the item_game.xml layout
+            tvName = itemView.findViewById(R.id.tvName);
+            tvGenres = itemView.findViewById(R.id.tvGenres);
+            tvSources = itemView.findViewById(R.id.tvSources);
+            tvCriticScore = itemView.findViewById(R.id.tvCriticScore);
         }
     }
 }

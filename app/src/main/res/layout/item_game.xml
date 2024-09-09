@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Game Name -->
+    <TextView
+        android:id="@+id/tvName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:text="Game Name" />
+
+    <!-- Game Genres -->
+    <TextView
+        android:id="@+id/tvGenres"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Genres: "
+        android:textStyle="italic" />
+
+    <!-- Game Sources -->
+    <TextView
+        android:id="@+id/tvSources"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sources: " />
+
+    <!-- Game Critic Score -->
+    <TextView
+        android:id="@+id/tvCriticScore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Critic Score: " />
+
+</LinearLayout>
