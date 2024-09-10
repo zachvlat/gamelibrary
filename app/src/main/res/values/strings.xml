@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Game Library</string>
+    <string name="genres">Genres:</string>
+    <string name="sources">Sources:</string>
+    <string name="critic_score">Critic Score:</string>
+    <string name="game_name">Game Name</string>
 </resources>

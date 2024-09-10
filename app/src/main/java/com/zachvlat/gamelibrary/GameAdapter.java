@@ -31,7 +31,7 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
         Game game = filteredGames.get(position);
         holder.tvName.setText(game.getName());
         holder.tvGenres.setText("Genres: " + (game.getGenres().isEmpty() ? "N/A" : game.getGenres()));
-        holder.tvSources.setText("Sources: " + game.getSources());
+        holder.tvSources.setText("Sources: " + String.join(", ", game.getSources()));
         holder.tvCriticScore.setText("Critic Score: " + (game.getCriticScore().isEmpty() ? "N/A" : game.getCriticScore()));
     }
 
@@ -56,6 +56,17 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
                 if (game.getName().toLowerCase().contains(lowerCaseQuery)) {
                     filteredGames.add(game);
                 }
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    // New method to filter games by source
+    public void filterBySource(String source) {
+        filteredGames.clear();
+        for (Game game : games) {
+            if (game.getSources().contains(source)) {
+                filteredGames.add(game);
             }
         }
         notifyDataSetChanged();

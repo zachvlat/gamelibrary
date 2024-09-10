@@ -6,25 +6,33 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
     private GameAdapter gameAdapter;
     private ActivityResultLauncher<Intent> filePickerLauncher;
     private SearchView searchView;
+    private ChipGroup chipGroup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(gameAdapter);
 
         searchView = findViewById(R.id.searchView);
+        chipGroup = findViewById(R.id.chipGroup); // Get ChipGroup for filter chips
 
-        // Try to load saved data from internal storage
         loadJsonFromInternalStorage();
 
         Button btnLoadJson = findViewById(R.id.btnLoadJson);
@@ -92,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
             String json = jsonBuilder.toString();
             List<Game> games = JsonUtils.parseJson(json);
             gameAdapter.setGames(games);
+            createFilterChips(games); // Create filter chips based on the sources
         } catch (FileNotFoundException e) {
             // No saved data, that's OK, app can start without it
             e.printStackTrace();
@@ -116,11 +125,34 @@ public class MainActivity extends AppCompatActivity {
 
             List<Game> games = JsonUtils.parseJson(json);
             gameAdapter.setGames(games);
+            createFilterChips(games); // Create filter chips based on the sources
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "Failed to load JSON", Toast.LENGTH_SHORT).show();
         }
     }
+
+// Method to create filter chips dynamically from sources
+    private void createFilterChips(List<Game> games) {
+        // Clear existing chips
+        chipGroup.removeAllViews();
+
+        // Use a set to avoid duplicate chips
+        Set<String> uniqueSources = new HashSet<>();
+        for (Game game : games) {
+            uniqueSources.addAll(game.getSources()); // Now getSources() returns a list of sources
+        }
+
+        // Create a chip for each unique source
+        for (String source : uniqueSources) {
+            Chip chip = new Chip(this);
+            chip.setText(source);
+            chip.setCheckable(true); // Make the chips selectable
+            chip.setOnClickListener(v -> gameAdapter.filterBySource(source)); // Filter games when chip is clicked
+            chipGroup.addView(chip); // Add chip to the ChipGroup
+        }
+    }
+
 
     private void openFilePicker() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);

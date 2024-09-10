@@ -12,14 +12,14 @@
         android:layout_height="wrap_content"
         android:textStyle="bold"
         android:textSize="18sp"
-        android:text="Game Name" />
+        android:text="@string/game_name" />
 
     <!-- Game Genres -->
     <TextView
         android:id="@+id/tvGenres"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Genres: "
+        android:text="@string/genres"
         android:textStyle="italic" />
 
     <!-- Game Sources -->
@@ -27,13 +27,19 @@
         android:id="@+id/tvSources"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sources: " />
+        android:text="@string/sources" />
 
     <!-- Game Critic Score -->
     <TextView
         android:id="@+id/tvCriticScore"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Critic Score: " />
+        android:text="@string/critic_score" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:background="?android:attr/colorAccent" />
 
 </LinearLayout>
