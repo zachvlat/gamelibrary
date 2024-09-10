@@ -5,4 +5,5 @@
     <string name="critic_score">Critic Score:</string>
     <string name="game_name">Game Name</string>
     <string name="load_json">Load JSON</string>
+    <string name="load_json2">Load JSON</string>
 </resources>
