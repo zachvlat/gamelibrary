@@ -6,19 +6,18 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -26,8 +25,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         getWindow().setStatusBarColor(Color.TRANSPARENT);
+
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -54,8 +56,9 @@ public class MainActivity extends AppCompatActivity {
 
         loadJsonFromInternalStorage();
 
-        Button btnLoadJson = findViewById(R.id.btnLoadJson);
-        btnLoadJson.setOnClickListener(v -> openFilePicker());
+        // Replace old Button with FloatingActionButton
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(v -> openFilePicker());
 
         filePickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
@@ -136,38 +139,41 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-// Method to create filter chips dynamically from sources
-private void createFilterChips(List<Game> games) {
-    // Clear existing chips
-    chipGroup.removeAllViews();
+    // Method to create filter chips dynamically from sources
+    private void createFilterChips(List<Game> games) {
+        // Clear existing chips
+        chipGroup.removeAllViews();
 
-    // Use a set to avoid duplicate chips
-    Set<String> uniqueSources = new HashSet<>();
-    for (Game game : games) {
-        uniqueSources.addAll(game.getSources());
-    }
-
-    // Create a chip for each unique source
-    for (String source : uniqueSources) {
-        Chip chip = new Chip(this);
-        chip.setText(source);
-        chip.setCheckable(true); // Make the chips selectable
-
-        chip.setOnCheckedChangeListener((compoundButton, isChecked) -> {
-            if (isChecked) {
-                // When the chip is selected, filter by that source
-                gameAdapter.filterBySource(source);
-            } else {
-                // When the chip is unselected, remove the source filter
-                gameAdapter.removeSourceFilter(source);
+        // Use a map to count games per source
+        Map<String, Integer> sourceCountMap = new HashMap<>();
+        for (Game game : games) {
+            for (String source : game.getSources()) {
+                sourceCountMap.put(source, sourceCountMap.getOrDefault(source, 0) + 1);
             }
-        });
+        }
 
-        chipGroup.addView(chip); // Add chip to the ChipGroup
+        // Create a chip for each unique source
+        for (Map.Entry<String, Integer> entry : sourceCountMap.entrySet()) {
+            String source = entry.getKey();
+            int count = entry.getValue();
+
+            Chip chip = new Chip(this);
+            chip.setText(source + " (" + count + ")"); // Update chip text to include count
+            chip.setCheckable(true); // Make the chips selectable
+
+            chip.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+                if (isChecked) {
+                    // When the chip is selected, filter by that source
+                    gameAdapter.filterBySource(source);
+                } else {
+                    // When the chip is unselected, remove the source filter
+                    gameAdapter.removeSourceFilter(source);
+                }
+            });
+
+            chipGroup.addView(chip); // Add chip to the ChipGroup
+        }
     }
-}
-
-
 
 
     private void openFilePicker() {
