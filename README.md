@@ -1,6 +1,6 @@
 # [Guide] Exporting Your Game Library
 
-This guide will walk you through the process of exporting your game library from Playnite into a JSON format that can be used with your Android Game Library application.
+This guide will walk you through the process of exporting your game library from Playnite into a JSON format.
 
 ## Step 1: Download the Library Exporter Extension
 
