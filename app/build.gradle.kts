@@ -10,8 +10,8 @@ android {
         applicationId = "com.zachvlat.gamelibrary"
         minSdk = 27
         targetSdk = 34
-        versionCode = 5
-        versionName = "1.5.3"
+        versionCode = 6
+        versionName = "1.7.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
