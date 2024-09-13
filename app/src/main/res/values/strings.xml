@@ -6,4 +6,7 @@
     <string name="game_name">Game Name</string>
     <string name="load_json">Load JSON</string>
     <string name="load_json2">Load JSON</string>
+    <string name="platform">Platform</string>
+    <string name="playtime">Playtime</string>
+    <string name="last_played">Last Played</string>
 </resources>

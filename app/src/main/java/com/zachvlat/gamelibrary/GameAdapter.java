@@ -7,20 +7,16 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder> {
 
     private List<Game> games = new ArrayList<>();
     private List<Game> filteredGames = new ArrayList<>();
-    private Set<String> activeSources = new HashSet<>(); // Track active source filters
-    private String activeQuery = ""; // Track the current search query
-
-    public GameAdapter() {
-        this.filteredGames = new ArrayList<>();
-    }
+    private Set<String> activeSources = new HashSet<>();
+    private String activeQuery = "";
 
     @NonNull
     @Override
@@ -33,9 +29,11 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
     public void onBindViewHolder(@NonNull GameViewHolder holder, int position) {
         Game game = filteredGames.get(position);
         holder.tvName.setText(game.getName());
-        holder.tvGenres.setText("Genres: " + (game.getGenres().isEmpty() ? "N/A" : game.getGenres()));
-        holder.tvSources.setText("Sources: " + String.join(", ", game.getSources()));
-        holder.tvCriticScore.setText("Critic Score: " + (game.getCriticScore().isEmpty() ? "N/A" : game.getCriticScore()));
+        holder.tvPlatform.setText("Platform: " + (game.getPlatform().isEmpty() ? "N/A" : game.getPlatform()));
+        holder.tvPlaytime.setText("Playtime: " + game.getPlaytime());
+        holder.tvLastPlayed.setText("Last Played: " + (game.getLastPlayed() == null ? "N/A" : game.getLastPlayed()));
+        holder.tvGenres.setText("Genres: " + (game.getGenres() == null || game.getGenres().isEmpty() ? "N/A" : String.join(", ", game.getGenres())));
+        holder.tvSources.setText("Sources: " + (game.getSources().isEmpty() ? "N/A" : game.getSources()));
     }
 
     @Override
@@ -49,31 +47,27 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
         notifyDataSetChanged();
     }
 
-    // Filter games by the search query
     public void filter(String query) {
         activeQuery = query.toLowerCase();
         applyFilters();
     }
 
-    // Filter games by a selected source (when a chip is selected)
     public void filterBySource(String source) {
-        activeSources.add(source); // Add this source to the active filters
+        activeSources.add(source);
         applyFilters();
     }
 
-    // Remove source filter (when a chip is deselected)
     public void removeSourceFilter(String source) {
-        activeSources.remove(source); // Remove the source from active filters
+        activeSources.remove(source);
         applyFilters();
     }
 
-    // Apply both query and source filters
     private void applyFilters() {
         filteredGames.clear();
 
         for (Game game : games) {
             boolean matchesQuery = game.getName().toLowerCase().contains(activeQuery);
-            boolean matchesSource = activeSources.isEmpty() || !activeSources.isEmpty() && containsAnySource(game.getSources(), activeSources);
+            boolean matchesSource = activeSources.isEmpty() || activeSources.contains(game.getSources());
 
             if (matchesQuery && matchesSource) {
                 filteredGames.add(game);
@@ -83,26 +77,18 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
         notifyDataSetChanged();
     }
 
-    // Utility method to check if a game contains any active source filters
-    private boolean containsAnySource(List<String> gameSources, Set<String> activeSources) {
-        for (String source : activeSources) {
-            if (gameSources.contains(source)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     static class GameViewHolder extends RecyclerView.ViewHolder {
 
-        TextView tvName, tvGenres, tvSources, tvCriticScore;
+        TextView tvName, tvPlatform, tvPlaytime, tvLastPlayed, tvGenres, tvSources;
 
         public GameViewHolder(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tvName);
+            tvPlatform = itemView.findViewById(R.id.tvPlatform);
+            tvPlaytime = itemView.findViewById(R.id.tvPlaytime);
+            tvLastPlayed = itemView.findViewById(R.id.tvLastPlayed);
             tvGenres = itemView.findViewById(R.id.tvGenres);
             tvSources = itemView.findViewById(R.id.tvSources);
-            tvCriticScore = itemView.findViewById(R.id.tvCriticScore);
         }
     }
 }

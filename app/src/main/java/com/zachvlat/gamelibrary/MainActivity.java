@@ -139,15 +139,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Method to create filter chips dynamically from sources
+// Method to create filter chips dynamically from sources
     private void createFilterChips(List<Game> games) {
         // Clear existing chips
         chipGroup.removeAllViews();
 
         // Use a map to count games per source
         Map<String, Integer> sourceCountMap = new HashMap<>();
+
+        // Iterate through each game
         for (Game game : games) {
-            for (String source : game.getSources()) {
+            // Get the source for the current game
+            String source = game.getSources();
+
+            // Update the count in the map
+            if (source != null && !source.isEmpty()) {
                 sourceCountMap.put(source, sourceCountMap.getOrDefault(source, 0) + 1);
             }
         }
@@ -174,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
             chipGroup.addView(chip); // Add chip to the ChipGroup
         }
     }
+
 
 
     private void openFilePicker() {

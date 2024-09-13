@@ -9,14 +9,22 @@ public class Game {
     @SerializedName("Name")
     private String name;
 
+    @SerializedName("Platform")
+    private String platform;
+
+    @SerializedName("Playtime")
+    private int playtime;
+
+    @SerializedName("LastPlayed")
+    private String lastPlayed;
+
     @SerializedName("Genres")
-    private String genres;
+    private List<String> genres;  // This is a list now
 
     @SerializedName("Sources")
-    private String sources;  // Comma-separated list
+    private String sources;  // This is a single string
 
-    @SerializedName("Critic Score")
-    private String criticScore;
+    // Getters and setters...
 
     public String getName() {
         return name;
@@ -26,33 +34,43 @@ public class Game {
         this.name = name;
     }
 
-    public String getGenres() {
+    public String getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(String platform) {
+        this.platform = platform;
+    }
+
+    public int getPlaytime() {
+        return playtime;
+    }
+
+    public void setPlaytime(int playtime) {
+        this.playtime = playtime;
+    }
+
+    public String getLastPlayed() {
+        return lastPlayed;
+    }
+
+    public void setLastPlayed(String lastPlayed) {
+        this.lastPlayed = lastPlayed;
+    }
+
+    public List<String> getGenres() {
         return genres;
     }
 
-    public void setGenres(String genres) {
+    public void setGenres(List<String> genres) {
         this.genres = genres;
     }
 
-    // Split sources string into a list
-    public List<String> getSources() {
-        // If the sources string is empty or null, return an empty list
-        if (sources == null || sources.isEmpty()) {
-            return Arrays.asList(); // Return an empty list
-        }
-        // Split by comma and trim spaces around each source
-        return Arrays.asList(sources.split("\\s*,\\s*"));
+    public String getSources() {
+        return sources;
     }
 
     public void setSources(String sources) {
         this.sources = sources;
-    }
-
-    public String getCriticScore() {
-        return criticScore;
-    }
-
-    public void setCriticScore(String criticScore) {
-        this.criticScore = criticScore;
     }
 }

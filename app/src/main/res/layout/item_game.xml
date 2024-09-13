@@ -14,6 +14,28 @@
         android:textSize="18sp"
         android:text="@string/game_name" />
 
+    <!-- Game Platform -->
+    <TextView
+        android:id="@+id/tvPlatform"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/platform"
+        android:textStyle="italic" />
+
+    <!-- Game Playtime -->
+    <TextView
+        android:id="@+id/tvPlaytime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/playtime" />
+
+    <!-- Game Last Played -->
+    <TextView
+        android:id="@+id/tvLastPlayed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/last_played" />
+
     <!-- Game Genres -->
     <TextView
         android:id="@+id/tvGenres"
