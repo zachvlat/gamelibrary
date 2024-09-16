@@ -52,11 +52,11 @@
         android:text="@string/sources" />
 
     <!-- Game Critic Score -->
-    <TextView
-        android:id="@+id/tvCriticScore"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/critic_score" />
+<!--    <TextView-->
+<!--        android:id="@+id/tvCriticScore"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="@string/critic_score" />-->
 
     <View
         android:layout_width="match_parent"
