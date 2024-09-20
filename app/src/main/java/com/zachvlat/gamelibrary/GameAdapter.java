@@ -1,5 +1,6 @@
 package com.zachvlat.gamelibrary;
 
+import android.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,10 +35,18 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
         holder.tvLastPlayed.setText("Last Played: " + (game.getLastPlayed() == null ? "N/A" : game.getLastPlayed()));
         holder.tvGenres.setText("Genres: " + (game.getGenres() == null || game.getGenres().isEmpty() ? "N/A" : String.join(", ", game.getGenres())));
         holder.tvSources.setText("Sources: " + (game.getSources().isEmpty() ? "N/A" : game.getSources()));
-        holder.tvDescription.setText("Description: " + (game.getDescription() == null ? "N/A" : game.getDescription()));
-        holder.tvReleaseDate.setText("Release Date: " + (game.getReleaseDate() == null ? "N/A" : game.getReleaseDate()));
-        holder.tvCommunityHubUrl.setText("Community Hub: " + (game.getCommunityHubUrl() == null ? "N/A" : game.getCommunityHubUrl()));
+
+        // Set up the description TextView with a click listener
+        holder.tvDescription.setText(game.getDescription());
+        holder.tvDescription.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(holder.itemView.getContext());
+            builder.setTitle(game.getName());
+            builder.setMessage(game.getDescription());
+            builder.setPositiveButton("Close", null);
+            builder.show();
+        });
     }
+
 
 
     @Override

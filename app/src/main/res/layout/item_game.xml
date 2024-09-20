@@ -32,9 +32,13 @@
     <!-- Game Description -->
     <TextView
         android:id="@+id/tvDescription"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/description" />
+        android:text="@string/description"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:clickable="true"
+        android:focusable="true" />
 
     <!-- Game Release Date -->
     <TextView
@@ -48,8 +52,10 @@
         android:id="@+id/tvCommunityHubUrl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/community_hub_url" />
-
+        android:text="@string/community_hub_url"
+        android:autoLink="web"
+        android:clickable="true"
+        android:focusable="true" />
 
     <!-- Game Last Played -->
     <TextView
