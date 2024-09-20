@@ -29,6 +29,28 @@
         android:layout_height="wrap_content"
         android:text="@string/playtime" />
 
+    <!-- Game Description -->
+    <TextView
+        android:id="@+id/tvDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/description" />
+
+    <!-- Game Release Date -->
+    <TextView
+        android:id="@+id/tvReleaseDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/release_date" />
+
+    <!-- Game Community Hub URL -->
+    <TextView
+        android:id="@+id/tvCommunityHubUrl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/community_hub_url" />
+
+
     <!-- Game Last Played -->
     <TextView
         android:id="@+id/tvLastPlayed"

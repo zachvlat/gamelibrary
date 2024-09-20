@@ -34,7 +34,11 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
         holder.tvLastPlayed.setText("Last Played: " + (game.getLastPlayed() == null ? "N/A" : game.getLastPlayed()));
         holder.tvGenres.setText("Genres: " + (game.getGenres() == null || game.getGenres().isEmpty() ? "N/A" : String.join(", ", game.getGenres())));
         holder.tvSources.setText("Sources: " + (game.getSources().isEmpty() ? "N/A" : game.getSources()));
+        holder.tvDescription.setText("Description: " + (game.getDescription() == null ? "N/A" : game.getDescription()));
+        holder.tvReleaseDate.setText("Release Date: " + (game.getReleaseDate() == null ? "N/A" : game.getReleaseDate()));
+        holder.tvCommunityHubUrl.setText("Community Hub: " + (game.getCommunityHubUrl() == null ? "N/A" : game.getCommunityHubUrl()));
     }
+
 
     @Override
     public int getItemCount() {
@@ -80,6 +84,9 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
     static class GameViewHolder extends RecyclerView.ViewHolder {
 
         TextView tvName, tvPlatform, tvPlaytime, tvLastPlayed, tvGenres, tvSources;
+        TextView tvDescription; // New property
+        TextView tvReleaseDate; // New property
+        TextView tvCommunityHubUrl; // New property
 
         public GameViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -89,6 +96,10 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
             tvLastPlayed = itemView.findViewById(R.id.tvLastPlayed);
             tvGenres = itemView.findViewById(R.id.tvGenres);
             tvSources = itemView.findViewById(R.id.tvSources);
+            tvDescription = itemView.findViewById(R.id.tvDescription); // Initialize new property
+            tvReleaseDate = itemView.findViewById(R.id.tvReleaseDate); // Initialize new property
+            tvCommunityHubUrl = itemView.findViewById(R.id.tvCommunityHubUrl); // Initialize new property
         }
     }
+
 }

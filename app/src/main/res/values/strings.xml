@@ -9,4 +9,7 @@
     <string name="platform">Platform</string>
     <string name="playtime">Playtime</string>
     <string name="last_played">Last Played</string>
+    <string name="description">Description</string>
+    <string name="release_date">Release Date</string>
+    <string name="community_hub_url">Community Hub URL</string>
 </resources>
