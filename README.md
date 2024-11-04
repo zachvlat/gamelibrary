@@ -1,6 +1,6 @@
 # Game Library
 
-Is an app to store your games from multiple sources that you have on Playnite and exported through [Playnite Library Exporter](https://playnite.link/addons.html#LibraryExporter_54bf64c6-c453-4cbc-92f8-4960b56f930e).
+Is an app to store your games from multiple sources that you have on Playnite and exported through [Playnite JSON](https://github.com/zachvlat/playnite-json)
 
 ## Screenshot:
 
