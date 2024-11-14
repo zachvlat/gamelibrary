@@ -4,9 +4,14 @@ import android.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +34,7 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
     @Override
     public void onBindViewHolder(@NonNull GameViewHolder holder, int position) {
         Game game = filteredGames.get(position);
+
         holder.tvName.setText(game.getName());
         holder.tvPlatform.setText("Platform: " + (game.getPlatform().isEmpty() ? "N/A" : game.getPlatform()));
         holder.tvPlaytime.setText("Playtime: " + game.getPlaytime());
@@ -45,9 +51,14 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
             builder.setPositiveButton("Close", null);
             builder.show();
         });
+
+        // Load cover art if available using Glide
+        if (game.getCoverArtUrl() != null && !game.getCoverArtUrl().isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(game.getCoverArtUrl()) // Load the image from the URL
+                    .into(holder.ivCoverArt);  // Set the image into the ImageView
+        }
     }
-
-
 
     @Override
     public int getItemCount() {
@@ -96,6 +107,7 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
         TextView tvDescription; // New property
         TextView tvReleaseDate; // New property
         TextView tvCommunityHubUrl; // New property
+        ImageView ivCoverArt; // New property for cover art
 
         public GameViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -108,7 +120,7 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
             tvDescription = itemView.findViewById(R.id.tvDescription); // Initialize new property
             tvReleaseDate = itemView.findViewById(R.id.tvReleaseDate); // Initialize new property
             tvCommunityHubUrl = itemView.findViewById(R.id.tvCommunityHubUrl); // Initialize new property
+            ivCoverArt = itemView.findViewById(R.id.ivCoverArt); // Initialize the ImageView for cover art
         }
     }
-
 }

@@ -2,94 +2,88 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:padding="16dp">
 
-    <!-- Game Name -->
-    <TextView
-        android:id="@+id/tvName"
-        android:layout_width="wrap_content"
+    <ImageView
+        android:id="@+id/ivCoverArt"
+        android:layout_width="100dp"
+        android:layout_height="150dp"
+        android:layout_margin="8dp"
+        android:contentDescription="Cover Art"
+        android:scaleType="centerCrop"
+        />
+
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textSize="18sp"
-        android:text="@string/game_name" />
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-    <!-- Game Platform -->
-    <TextView
-        android:id="@+id/tvPlatform"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/platform"
-        android:textStyle="italic" />
+        <TextView
+            android:id="@+id/tvName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:text="@string/game_name" />
 
-    <!-- Game Playtime -->
-    <TextView
-        android:id="@+id/tvPlaytime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/playtime" />
+        <TextView
+            android:id="@+id/tvPlatform"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/platform"
+            android:textStyle="italic" />
 
-    <!-- Game Description -->
-    <TextView
-        android:id="@+id/tvDescription"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/description"
-        android:maxLines="3"
-        android:ellipsize="end"
-        android:clickable="true"
-        android:focusable="true" />
+        <TextView
+            android:id="@+id/tvPlaytime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/playtime" />
 
-    <!-- Game Release Date -->
-    <TextView
-        android:id="@+id/tvReleaseDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/release_date" />
+        <TextView
+            android:id="@+id/tvDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/description"
+            android:maxLines="3"
+            android:ellipsize="end"
+            android:clickable="true"
+            android:focusable="true" />
 
-    <!-- Game Community Hub URL -->
-    <TextView
-        android:id="@+id/tvCommunityHubUrl"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/community_hub_url"
-        android:autoLink="web"
-        android:clickable="true"
-        android:focusable="true" />
+        <TextView
+            android:id="@+id/tvReleaseDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/release_date" />
 
-    <!-- Game Last Played -->
-    <TextView
-        android:id="@+id/tvLastPlayed"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/last_played" />
+        <TextView
+            android:id="@+id/tvCommunityHubUrl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/community_hub_url"
+            android:autoLink="web"
+            android:clickable="true"
+            android:focusable="true" />
 
-    <!-- Game Genres -->
-    <TextView
-        android:id="@+id/tvGenres"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/genres"
-        android:textStyle="italic" />
+        <TextView
+            android:id="@+id/tvLastPlayed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/last_played" />
 
-    <!-- Game Sources -->
-    <TextView
-        android:id="@+id/tvSources"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/sources" />
+        <TextView
+            android:id="@+id/tvGenres"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/genres"
+            android:textStyle="italic" />
 
-    <!-- Game Critic Score -->
-<!--    <TextView-->
-<!--        android:id="@+id/tvCriticScore"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="@string/critic_score" />-->
+        <TextView
+            android:id="@+id/tvSources"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sources" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="16dp"
-        android:background="?android:attr/colorAccent" />
-
+    </LinearLayout>
 </LinearLayout>

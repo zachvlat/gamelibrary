@@ -38,7 +38,19 @@ public class Game {
     @SerializedName("Added")
     private String added; // New property
 
+    @SerializedName("CoverArtUrl")
+    private String coverArtUrl;
+
     // Getters and setters...
+
+    public String getCoverArtUrl() {
+        return coverArtUrl;
+    }
+
+    public void setCoverArtUrl(String coverArtUrl) {
+        this.coverArtUrl = coverArtUrl;
+    }
+
     public String getId() {
         return id;
     }

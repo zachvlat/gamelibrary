@@ -19,6 +19,8 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import com.bumptech.glide.Glide;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -139,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-// Method to create filter chips dynamically from sources
+    // Method to create filter chips dynamically from sources
     private void createFilterChips(List<Game> games) {
         // Clear existing chips
         chipGroup.removeAllViews();
@@ -180,8 +182,6 @@ public class MainActivity extends AppCompatActivity {
             chipGroup.addView(chip); // Add chip to the ChipGroup
         }
     }
-
-
 
     private void openFilePicker() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);

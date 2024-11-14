@@ -21,5 +21,5 @@ This guide will walk you through the process of exporting your game library from
 
 ## Step 2: Export Your Game Library
 
-1. Take the generated games_output.json
+1. Take the generated games_export.json
 2. Import the json file into your app.
