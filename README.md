@@ -6,8 +6,7 @@ Is an app to store your games from multiple sources that you have on Playnite an
 
 ## Screenshot:
 
-<img src="https://github.com/user-attachments/assets/e78d19f8-c308-4b05-9b03-83a2182ccb72" alt="drawing" style="width:200px;"/>
-
+![share_7728338185553370379](https://github.com/user-attachments/assets/e68e5040-c706-4595-90b9-a926fab76d27)
 
 # [Guide] Exporting Your Game Library
 
