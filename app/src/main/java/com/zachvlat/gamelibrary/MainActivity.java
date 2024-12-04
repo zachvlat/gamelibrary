@@ -19,8 +19,6 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import com.bumptech.glide.Glide;
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,17 +26,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
     private GameAdapter gameAdapter;
     private ActivityResultLauncher<Intent> filePickerLauncher;
     private SearchView searchView;
-    private ChipGroup chipGroup;
+    private ChipGroup chipGroup; // Correctly reference the ChipGroup
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,21 +43,26 @@ public class MainActivity extends AppCompatActivity {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         getWindow().setStatusBarColor(Color.TRANSPARENT);
 
+        // Initialize RecyclerView
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        // Initialize GameAdapter
         gameAdapter = new GameAdapter();
         recyclerView.setAdapter(gameAdapter);
 
+        // Initialize searchView and chipGroup
         searchView = findViewById(R.id.searchView);
-        chipGroup = findViewById(R.id.chipGroup); // Get ChipGroup for filter chips
+        chipGroup = findViewById(R.id.chipGroup); // Reference ChipGroup correctly
 
+        // Load the JSON from internal storage
         loadJsonFromInternalStorage();
 
-        // Replace old Button with FloatingActionButton
+        // Set up the file picker for the FloatingActionButton
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(v -> openFilePicker());
 
+        // Register the file picker launcher for reading a JSON file
         filePickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                 Uri uri = result.getData().getData();
@@ -69,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Set up SearchView to filter games
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -111,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
             gameAdapter.setGames(games);
             createFilterChips(games); // Create filter chips based on the sources
         } catch (FileNotFoundException e) {
-            // No saved data, that's OK, app can start without it
+            // No saved data, that's OK
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
@@ -119,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Method to read JSON from the file picker
+    // Method to read JSON from URI (file picker)
     private void readJsonFromUri(Uri uri) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(getContentResolver().openInputStream(uri)))) {
             StringBuilder jsonBuilder = new StringBuilder();
@@ -151,10 +153,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Iterate through each game
         for (Game game : games) {
-            // Get the source for the current game
             String source = game.getSources();
-
-            // Update the count in the map
             if (source != null && !source.isEmpty()) {
                 sourceCountMap.put(source, sourceCountMap.getOrDefault(source, 0) + 1);
             }
@@ -166,27 +165,26 @@ public class MainActivity extends AppCompatActivity {
             int count = entry.getValue();
 
             Chip chip = new Chip(this);
-            chip.setText(source + " (" + count + ")"); // Update chip text to include count
-            chip.setCheckable(true); // Make the chips selectable
+            chip.setText(source + " (" + count + ")");
+            chip.setCheckable(true);
 
             chip.setOnCheckedChangeListener((compoundButton, isChecked) -> {
                 if (isChecked) {
-                    // When the chip is selected, filter by that source
                     gameAdapter.filterBySource(source);
                 } else {
-                    // When the chip is unselected, remove the source filter
                     gameAdapter.removeSourceFilter(source);
                 }
             });
 
-            chipGroup.addView(chip); // Add chip to the ChipGroup
+            chipGroup.addView(chip);
         }
     }
 
+    // Method to open the file picker
     private void openFilePicker() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("application/json");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
         filePickerLauncher.launch(intent);
     }
 }
