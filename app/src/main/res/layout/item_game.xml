@@ -6,7 +6,7 @@
     android:padding="16dp">
 
     <ImageView
-        android:id="@+id/ivCoverArt"
+        android:id="@+id/gameCoverArt"
         android:layout_width="100dp"
         android:layout_height="150dp"
         android:layout_margin="8dp"
@@ -21,7 +21,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tvName"
+            android:id="@+id/gameName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
@@ -29,20 +29,20 @@
             android:text="@string/game_name" />
 
         <TextView
-            android:id="@+id/tvPlatform"
+            android:id="@+id/gamePlatform"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/platform"
             android:textStyle="italic" />
 
         <TextView
-            android:id="@+id/tvPlaytime"
+            android:id="@+id/gamePlaytime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/playtime" />
 
         <TextView
-            android:id="@+id/tvDescription"
+            android:id="@+id/gameDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/description"
@@ -52,13 +52,13 @@
             android:focusable="true" />
 
         <TextView
-            android:id="@+id/tvReleaseDate"
+            android:id="@+id/gameReleaseDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/release_date" />
 
         <TextView
-            android:id="@+id/tvCommunityHubUrl"
+            android:id="@+id/gameCommunityHubUrl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/community_hub_url"
@@ -67,20 +67,20 @@
             android:focusable="true" />
 
         <TextView
-            android:id="@+id/tvLastPlayed"
+            android:id="@+id/gameLastPlayed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/last_played" />
 
         <TextView
-            android:id="@+id/tvGenres"
+            android:id="@+id/gameGenres"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/genres"
             android:textStyle="italic" />
 
         <TextView
-            android:id="@+id/tvSources"
+            android:id="@+id/gameSources"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/sources" />

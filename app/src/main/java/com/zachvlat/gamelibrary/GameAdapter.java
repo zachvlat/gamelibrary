@@ -35,16 +35,16 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
     public void onBindViewHolder(@NonNull GameViewHolder holder, int position) {
         Game game = filteredGames.get(position);
 
-        holder.tvName.setText(game.getName());
-        holder.tvPlatform.setText("Platform: " + (game.getPlatform().isEmpty() ? "N/A" : game.getPlatform()));
-        holder.tvPlaytime.setText("Playtime: " + game.getPlaytime());
-        holder.tvLastPlayed.setText("Last Played: " + (game.getLastPlayed() == null ? "N/A" : game.getLastPlayed()));
-        holder.tvGenres.setText("Genres: " + (game.getGenres() == null || game.getGenres().isEmpty() ? "N/A" : String.join(", ", game.getGenres())));
-        holder.tvSources.setText("Sources: " + (game.getSources().isEmpty() ? "N/A" : game.getSources()));
+        holder.gameName.setText(game.getName());
+        holder.gamePlatform.setText("Platform: " + (game.getPlatform().isEmpty() ? "N/A" : game.getPlatform()));
+        holder.gamePlaytime.setText("Playtime: " + game.getPlaytime());
+        holder.gameLastPlayed.setText("Last Played: " + (game.getLastPlayed() == null ? "N/A" : game.getLastPlayed()));
+        holder.gameGenres.setText("Genres: " + (game.getGenres() == null || game.getGenres().isEmpty() ? "N/A" : String.join(", ", game.getGenres())));
+        holder.gameSources.setText("Sources: " + (game.getSources().isEmpty() ? "N/A" : game.getSources()));
 
         // Set up the description TextView with a click listener
-        holder.tvDescription.setText(game.getDescription());
-        holder.tvDescription.setOnClickListener(v -> {
+        holder.gameDescription.setText(game.getDescription());
+        holder.gameDescription.setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(holder.itemView.getContext());
             builder.setTitle(game.getName());
             builder.setMessage(game.getDescription());
@@ -56,7 +56,7 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
         if (game.getCoverArtUrl() != null && !game.getCoverArtUrl().isEmpty()) {
             Glide.with(holder.itemView.getContext())
                     .load(game.getCoverArtUrl()) // Load the image from the URL
-                    .into(holder.ivCoverArt);  // Set the image into the ImageView
+                    .into(holder.gameCoverArt);  // Set the image into the ImageView
         }
     }
 
@@ -103,24 +103,24 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
 
     static class GameViewHolder extends RecyclerView.ViewHolder {
 
-        TextView tvName, tvPlatform, tvPlaytime, tvLastPlayed, tvGenres, tvSources;
-        TextView tvDescription; // New property
-        TextView tvReleaseDate; // New property
-        TextView tvCommunityHubUrl; // New property
-        ImageView ivCoverArt; // New property for cover art
+        TextView gameName, gamePlatform, gamePlaytime, gameLastPlayed, gameGenres, gameSources;
+        TextView gameDescription; // New property
+        TextView gameReleaseDate; // New property
+        TextView gameCommunityHubUrl; // New property
+        ImageView gameCoverArt; // New property for cover art
 
         public GameViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvName = itemView.findViewById(R.id.tvName);
-            tvPlatform = itemView.findViewById(R.id.tvPlatform);
-            tvPlaytime = itemView.findViewById(R.id.tvPlaytime);
-            tvLastPlayed = itemView.findViewById(R.id.tvLastPlayed);
-            tvGenres = itemView.findViewById(R.id.tvGenres);
-            tvSources = itemView.findViewById(R.id.tvSources);
-            tvDescription = itemView.findViewById(R.id.tvDescription); // Initialize new property
-            tvReleaseDate = itemView.findViewById(R.id.tvReleaseDate); // Initialize new property
-            tvCommunityHubUrl = itemView.findViewById(R.id.tvCommunityHubUrl); // Initialize new property
-            ivCoverArt = itemView.findViewById(R.id.ivCoverArt); // Initialize the ImageView for cover art
+            gameName = itemView.findViewById(R.id.gameName);
+            gamePlatform = itemView.findViewById(R.id.gamePlatform);
+            gamePlaytime = itemView.findViewById(R.id.gamePlaytime);
+            gameLastPlayed = itemView.findViewById(R.id.gameLastPlayed);
+            gameGenres = itemView.findViewById(R.id.gameGenres);
+            gameSources = itemView.findViewById(R.id.gameSources);
+            gameDescription = itemView.findViewById(R.id.gameDescription); // Initialize new property
+            gameReleaseDate = itemView.findViewById(R.id.gameReleaseDate); // Initialize new property
+            gameCommunityHubUrl = itemView.findViewById(R.id.gameCommunityHubUrl); // Initialize new property
+            gameCoverArt = itemView.findViewById(R.id.gameCoverArt); // Initialize the ImageView for cover art
         }
     }
 }
