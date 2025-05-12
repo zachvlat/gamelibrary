@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private SearchView searchView;
     private ChipGroup chipGroup; // Correctly reference the ChipGroup
 
+    private ChipGroup sortChipGroup;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +56,9 @@ public class MainActivity extends AppCompatActivity {
         // Initialize searchView and chipGroup
         searchView = findViewById(R.id.searchView);
         chipGroup = findViewById(R.id.chipGroup); // Reference ChipGroup correctly
+
+        sortChipGroup = findViewById(R.id.sortChipGroup);
+        createSortChips();
 
         // Load the JSON from internal storage
         loadJsonFromInternalStorage();
@@ -179,6 +184,34 @@ public class MainActivity extends AppCompatActivity {
             chipGroup.addView(chip);
         }
     }
+
+    private void createSortChips() {
+        sortChipGroup.removeAllViews();
+
+        String[] sortOptions = {"Name", "Playtime", "LastPlayed", "ReleaseDate", "Added"};
+
+        for (String option : sortOptions) {
+            Chip chip = new Chip(this);
+            chip.setText(option);
+            chip.setCheckable(true);
+
+            chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    gameAdapter.sortBy(option);
+                    // Uncheck other chips
+                    for (int i = 0; i < sortChipGroup.getChildCount(); i++) {
+                        Chip otherChip = (Chip) sortChipGroup.getChildAt(i);
+                        if (otherChip != buttonView) {
+                            otherChip.setChecked(false);
+                        }
+                    }
+                }
+            });
+
+            sortChipGroup.addView(chip);
+        }
+    }
+
 
     // Method to open the file picker
     private void openFilePicker() {

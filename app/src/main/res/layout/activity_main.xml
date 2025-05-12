@@ -21,18 +21,35 @@
         android:id="@+id/horizontalScrollView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_marginHorizontal="8dp"
         android:scrollbars="horizontal"
         app:layout_constraintTop_toBottomOf="@id/searchView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chipGroup"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingEnd="8dp" />
+            android:orientation="vertical">
+
+            <!-- Filter ChipGroup -->
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingEnd="8dp"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Sorting ChipGroup -->
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/sortChipGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingEnd="8dp" />
+
+        </LinearLayout>
     </android.widget.HorizontalScrollView>
 
     <androidx.recyclerview.widget.RecyclerView

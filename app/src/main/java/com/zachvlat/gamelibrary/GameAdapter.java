@@ -101,6 +101,46 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
         notifyDataSetChanged();
     }
 
+    public void sortBy(String option) {
+        switch (option) {
+            case "Name":
+                filteredGames.sort((g1, g2) -> g1.getName().compareToIgnoreCase(g2.getName()));
+                break;
+            case "Playtime":
+                filteredGames.sort((g1, g2) -> Integer.compare(g2.getPlaytime(), g1.getPlaytime())); // Descending
+                break;
+            case "LastPlayed":
+                filteredGames.sort((g1, g2) -> {
+                    String lp1 = g1.getLastPlayed() != null ? g1.getLastPlayed() : "";
+                    String lp2 = g2.getLastPlayed() != null ? g2.getLastPlayed() : "";
+                    return lp2.compareTo(lp1); // Descending
+                });
+                break;
+            case "ReleaseDate":
+                filteredGames.sort((g1, g2) -> {
+                    String r1 = g1.getReleaseDate() != null ? g1.getReleaseDate() : "";
+                    String r2 = g2.getReleaseDate() != null ? g2.getReleaseDate() : "";
+                    return r2.compareTo(r1); // Descending
+                });
+                break;
+            case "Added":
+                filteredGames.sort((g1, g2) -> {
+                    String a1 = g1.getAdded() != null ? g1.getAdded() : "";
+                    String a2 = g2.getAdded() != null ? g2.getAdded() : "";
+                    return a2.compareTo(a1); // Descending
+                });
+                break;
+            default:
+                // Default to original order
+                filteredGames = new ArrayList<>(games);
+                applyFilters();
+                return;
+        }
+
+        notifyDataSetChanged();
+    }
+
+
     static class GameViewHolder extends RecyclerView.ViewHolder {
 
         TextView gameName, gamePlatform, gamePlaytime, gameLastPlayed, gameGenres, gameSources;
