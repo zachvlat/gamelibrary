@@ -138,4 +138,38 @@ public class Game {
     public void setSources(String sources) {
         this.sources = sources;
     }
+
+    @SerializedName("CommunityScore")
+    private Double communityScore;
+
+    @SerializedName("CriticScore")
+    private Integer criticScore;
+
+    @SerializedName("UserScore")
+    private Double userScore;
+
+    public Double getCommunityScore() {
+        return communityScore != null ? communityScore : 0.0;
+    }
+
+    public void setCommunityScore(Double communityScore) {
+        this.communityScore = communityScore;
+    }
+
+    public Integer getCriticScore() {
+        return criticScore != null ? criticScore : 0;
+    }
+
+    public void setCriticScore(Integer criticScore) {
+        this.criticScore = criticScore;
+    }
+
+    public Double getUserScore() {
+        return userScore != null ? userScore : 0.0;
+    }
+
+    public void setUserScore(Double userScore) {
+        this.userScore = userScore;
+    }
+
 }

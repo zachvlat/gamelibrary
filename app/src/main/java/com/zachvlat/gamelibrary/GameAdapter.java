@@ -103,6 +103,16 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
 
     public void sortBy(String option) {
         switch (option) {
+            case "Community Score":
+                filteredGames.sort((g1, g2) -> Double.compare(g2.getCommunityScore(), g1.getCommunityScore()));
+                break;
+            case "Critic Score":
+                filteredGames.sort((g1, g2) -> Integer.compare(g2.getCriticScore(), g1.getCriticScore()));
+                break;
+            case "User Score":
+                filteredGames.sort((g1, g2) -> Double.compare(g2.getUserScore(), g1.getUserScore()));
+                break;
+
             case "Name":
                 filteredGames.sort((g1, g2) -> g1.getName().compareToIgnoreCase(g2.getName()));
                 break;
@@ -159,7 +169,7 @@ public class GameAdapter extends RecyclerView.Adapter<GameAdapter.GameViewHolder
             gameSources = itemView.findViewById(R.id.gameSources);
             gameDescription = itemView.findViewById(R.id.gameDescription); // Initialize new property
             gameReleaseDate = itemView.findViewById(R.id.gameReleaseDate); // Initialize new property
-            gameCommunityHubUrl = itemView.findViewById(R.id.gameCommunityHubUrl); // Initialize new property
+//            gameCommunityHubUrl = itemView.findViewById(R.id.gameCommunityHubUrl); // Initialize new property
             gameCoverArt = itemView.findViewById(R.id.gameCoverArt); // Initialize the ImageView for cover art
         }
     }

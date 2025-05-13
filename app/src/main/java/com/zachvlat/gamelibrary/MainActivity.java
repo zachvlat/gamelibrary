@@ -188,7 +188,11 @@ public class MainActivity extends AppCompatActivity {
     private void createSortChips() {
         sortChipGroup.removeAllViews();
 
-        String[] sortOptions = {"Name", "Playtime", "LastPlayed", "ReleaseDate", "Added"};
+        String[] sortOptions = {
+                "Name", "Playtime", "Last Played", "Release Date", "Added",
+                "Community Score", "Critic Score", "User Score"
+        };
+
 
         for (String option : sortOptions) {
             Chip chip = new Chip(this);
