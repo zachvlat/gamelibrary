@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Game Library",
+    "slug": "gamelibrary",
+    "version": "3.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#272B30"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#272B30"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.zachvlat.gamelibrary"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "256f4266-582e-4bc8-9d69-ee970a6279dd"
+      }
+    }
+  }
+}
