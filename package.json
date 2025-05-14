@@ -13,6 +13,7 @@
     "@react-navigation/drawer": "^7.3.12",
     "@react-navigation/native": "^7.1.9",
     "expo": "~53.0.9",
+    "expo-document-picker": "~13.1.5",
     "expo-status-bar": "~2.2.3",
     "react": "19.0.0",
     "react-dom": "19.0.0",
@@ -21,8 +22,7 @@
     "react-native-fs": "^2.20.0",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.10.0",
-    "react-native-web": "^0.20.0",
-    "expo-document-picker": "~13.1.5"
+    "react-native-web": "^0.20.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
