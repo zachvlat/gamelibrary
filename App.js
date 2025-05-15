@@ -85,7 +85,7 @@ export default function App() {
         <Drawer.Screen name="Home" component={HomeScreen} />
         {sources.map((source) => (
           <Drawer.Screen key={source} name={source}>
-            {() => <SourceScreen source={source} />}
+            {() => <SourceScreen source={source} importedData={importedData} />}
           </Drawer.Screen>
         ))}
       </Drawer.Navigator>
