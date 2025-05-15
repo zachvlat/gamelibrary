@@ -21,7 +21,8 @@
         "backgroundColor": "#272B30"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.zachvlat.gamelibrary"
+      "package": "com.zachvlat.gamelibrary",
+      "permissions": ["READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
