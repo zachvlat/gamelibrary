@@ -4,7 +4,6 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { StatusBar } from 'expo-status-bar';
 import { View, Image } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
-
 import MainContent from './components/MainContent';
 import Footer from './components/Footer';
 import SourceScreen from './screen/SourceScreen';
