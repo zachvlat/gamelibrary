@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { StatusBar } from 'expo-status-bar';
 import { View, Image } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
 import MainContent from './components/MainContent';
 import Footer from './components/Footer';
 import SourceScreen from './screen/SourceScreen';
@@ -19,8 +20,28 @@ const MyTheme = {
 
 const Drawer = createDrawerNavigator();
 
+const DATA_FILE_PATH = FileSystem.documentDirectory + 'importedData.json';
+
 export default function App() {
   const [importedData, setImportedData] = useState([]);
+
+  // Load saved data on app start
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const fileInfo = await FileSystem.getInfoAsync(DATA_FILE_PATH);
+        if (fileInfo.exists) {
+          const fileContent = await FileSystem.readAsStringAsync(DATA_FILE_PATH);
+          const parsed = JSON.parse(fileContent);
+          setImportedData(parsed);
+        }
+      } catch (error) {
+        console.error('Failed to load stored data:', error);
+      }
+    };
+
+    loadData();
+  }, []);
 
   const sources = useMemo(() => {
     return [...new Set(importedData.map((game) => game.Sources).filter(Boolean))];
@@ -38,6 +59,7 @@ export default function App() {
         const parsed = JSON.parse(fileContent);
         if (Array.isArray(parsed)) {
           setImportedData(parsed);
+          await FileSystem.writeAsStringAsync(DATA_FILE_PATH, JSON.stringify(parsed)); // Write to file
         } else {
           console.warn('Imported file is not a valid array.');
         }
