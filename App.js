@@ -69,14 +69,14 @@ export default function App() {
     }
   };
 
-  function HomeScreen() {
-    return (
-      <View style={styles.screenContainer}>
-        <MainContent />
-        <Footer onImport={handleImport} />
-      </View>
-    );
-  }
+function HomeScreen() {
+  return (
+    <View style={styles.screenContainer}>
+      <MainContent importedData={importedData} />
+      <Footer onImport={handleImport} />
+    </View>
+  );
+}
 
   return (
     <NavigationContainer theme={MyTheme}>
