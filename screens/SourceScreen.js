@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, FlatList, Image } from 'react-native';
 import { styles } from '../styles';
-import Footer from '../components/Footer';
 
 export default function SourceScreen({ source, importedData }) {
     const filteredGames = importedData.filter(game => game.Sources === source);
@@ -24,7 +23,6 @@ export default function SourceScreen({ source, importedData }) {
                     </View>
                 )}
             />
-            <Footer />
         </View>
     );
 }

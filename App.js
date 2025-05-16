@@ -7,7 +7,9 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import MainContent from './components/MainContent';
 import Footer from './components/Footer';
-import SourceScreen from './screen/SourceScreen';
+import SourceScreen from './screens/SourceScreen';
+import FavoritesScreen from './screens/FavoritesScreen';
+import SearchScreen from './screens/SearchScreen';
 import { styles } from './styles';
 
 const MyTheme = {
@@ -81,7 +83,7 @@ function HomeScreen() {
   return (
     <NavigationContainer theme={MyTheme}>
       <Drawer.Navigator
-        initialRouteName="Home"
+        initialRouteName="🏠 Home"
         screenOptions={{
           drawerStyle: { backgroundColor: '#272b30' },
           drawerLabelStyle: { color: '#fff' },
@@ -104,7 +106,9 @@ function HomeScreen() {
           ),
         }}
       >
-        <Drawer.Screen name="Home" component={HomeScreen} />
+        <Drawer.Screen name="🏠 Home" component={HomeScreen} />
+        <Drawer.Screen name="🔍 Search" component={SearchScreen} />
+        <Drawer.Screen name="❤️ Favorites" component={FavoritesScreen} />
         {sources.map((source) => (
           <Drawer.Screen key={source} name={source}>
             {() => <SourceScreen source={source} importedData={importedData} />}
