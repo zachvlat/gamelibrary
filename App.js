@@ -71,14 +71,14 @@ export default function App() {
     }
   };
 
-function HomeScreen() {
-  return (
-    <View style={styles.screenContainer}>
-      <MainContent importedData={importedData} />
-      <Footer onImport={handleImport} />
-    </View>
-  );
-}
+  function HomeScreen() {
+    return (
+      <View style={styles.screenContainer}>
+        <MainContent importedData={importedData} />
+        <Footer onImport={handleImport} />
+      </View>
+    );
+  }
 
   return (
     <NavigationContainer theme={MyTheme}>
@@ -107,7 +107,9 @@ function HomeScreen() {
         }}
       >
         <Drawer.Screen name="🏠 Home" component={HomeScreen} />
-        <Drawer.Screen name="🔍 Search" component={SearchScreen} />
+        <Drawer.Screen name="🔍 Search">
+          {() => <SearchScreen importedData={importedData} />}
+        </Drawer.Screen>
         <Drawer.Screen name="❤️ Favorites" component={FavoritesScreen} />
         {sources.map((source) => (
           <Drawer.Screen key={source} name={source}>

@@ -78,4 +78,28 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 5,
   },
+searchInput: {
+  backgroundColor: '#272b30',
+  color: '#fff',
+  padding: 15,
+  margin: 15,
+  borderRadius: 8,
+  fontSize: 16,
+},
+noResultsText: {
+  color: '#999',
+  textAlign: 'center',
+  marginTop: 20,
+  fontSize: 16,
+},
+centeredMessage: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+sourceText: {
+  color: '#aaa',
+  fontSize: 12,
+  marginTop: 4,
+}
 });
