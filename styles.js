@@ -101,5 +101,31 @@ sourceText: {
   color: '#aaa',
   fontSize: 12,
   marginTop: 4,
-}
+},
+chipContainer: {
+    paddingVertical: 10,
+    marginBottom: 5,
+    marginTop: 5,
+},
+chipContentContainer: {
+    paddingHorizontal: 10,
+    alignItems: 'center',
+},
+chip: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 0,
+    backgroundColor: '#2d3138',
+    marginHorizontal: 5,
+},
+chipActive: {
+    backgroundColor: '#3a7bd5',
+},
+chipText: {
+    color: '#ffffff',
+    fontSize: 14,
+},
+chipTextActive: {
+    fontWeight: 'bold',
+},
 });

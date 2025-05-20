@@ -8,7 +8,6 @@ import * as FileSystem from 'expo-file-system';
 import MainContent from './components/MainContent';
 import Footer from './components/Footer';
 import SourceScreen from './screens/SourceScreen';
-import FavoritesScreen from './screens/FavoritesScreen';
 import SearchScreen from './screens/SearchScreen';
 import { styles } from './styles';
 
@@ -110,7 +109,6 @@ export default function App() {
         <Drawer.Screen name="🔍 Search">
           {() => <SearchScreen importedData={importedData} />}
         </Drawer.Screen>
-        <Drawer.Screen name="❤️ Favorites" component={FavoritesScreen} />
         {sources.map((source) => (
           <Drawer.Screen key={source} name={source}>
             {() => <SourceScreen source={source} importedData={importedData} />}
