@@ -128,4 +128,26 @@ chipText: {
 chipTextActive: {
     fontWeight: 'bold',
 },
+  fabContainer: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  importFab: {
+    backgroundColor: '#55cdff',
+    width: 56,
+    height: 56,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  importFabText: {
+    color: '#FFFFFF',
+    fontSize: 24,
+  },
 });

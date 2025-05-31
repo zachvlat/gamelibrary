@@ -10,6 +10,7 @@ import Footer from './components/Footer';
 import SourceScreen from './screens/SourceScreen';
 import SearchScreen from './screens/SearchScreen';
 import { styles } from './styles';
+import { Ionicons } from '@expo/vector-icons';
 
 const MyTheme = {
   ...DefaultTheme,
@@ -82,7 +83,7 @@ export default function App() {
   return (
     <NavigationContainer theme={MyTheme}>
       <Drawer.Navigator
-        initialRouteName="🏠 Home"
+        initialRouteName="Home"
         screenOptions={{
           drawerStyle: { backgroundColor: '#272b30' },
           drawerLabelStyle: { color: '#fff' },
@@ -105,8 +106,19 @@ export default function App() {
           ),
         }}
       >
-        <Drawer.Screen name="🏠 Home" component={HomeScreen} />
-        <Drawer.Screen name="🔍 Search">
+        <Drawer.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            drawerIcon: () => <Ionicons name="home" size={24} color="#55cdff" />
+          }}
+        />
+        <Drawer.Screen
+          name="Search"
+          options={{
+            drawerIcon: () => <Ionicons name="search" size={24} color="#55cdff" />
+          }}
+        >
           {() => <SearchScreen importedData={importedData} />}
         </Drawer.Screen>
         {sources.map((source) => (
