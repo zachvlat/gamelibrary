@@ -1,0 +1,35 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Runs all the tests"
+  lane :test do
+    # Add your test commands here
+  end
+
+  desc "Build the iOS app"
+  lane :build do
+    # Add your build commands here
+  end
+
+  desc "Deploy a new version to the App Store"
+  lane :deploy do
+    # Add your deployment commands here
+  end
+end
+
+platform :android do
+  desc "Runs all the tests"
+  lane :test do
+    # Add your test commands here
+  end
+
+  desc "Build the Android app"
+  lane :build do
+    # Add your build commands here
+  end
+
+  desc "Deploy a new version to the Google Play Store"
+  lane :deploy do
+    # Add your deployment commands here
+  end
+end
