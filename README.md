@@ -28,15 +28,15 @@ Here are some screenshots of the application:
 
 ### Homepage
 
-![Homepage](screenshots/homepage.png)
+<img src="screenshots/homepage.png" alt="Homepage" width="200"/>
 
 ### Drawer
 
-![Drawer](screenshots/drawer.png)
+<img src="screenshots/drawer.png" alt="Drawer" width="200"/>
 
 ### List
 
-![List](screenshots/list.png)
+<img src="screenshots/list.png" alt="List" width="200"/>
 
 # [Guide] Exporting Your Game Library
 
