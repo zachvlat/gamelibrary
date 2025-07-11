@@ -1,4 +1,4 @@
-default_platform(:ios)
+default_platform(:android)
 
 platform :ios do
   desc "Runs all the tests"

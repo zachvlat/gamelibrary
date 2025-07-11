@@ -1,0 +1,5 @@
+Is an app to store your games from multiple sources that you have on Playnite and exported through Playnite JSON https://github.com/zachvlat/playnite-json
+
+Visit https://github.com/zachvlat/gamelibrary/blob/main/README.md for more information.
+
+Changelogs: https://github.com/zachvlat/gamelibrary/blob/main/fastlane/metadata/android/en-US/changelogs
