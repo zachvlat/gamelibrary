@@ -2,7 +2,7 @@
   "expo": {
     "name": "Game Library",
     "slug": "gamelibrary",
-    "version": "3.5.0",
+    "version": "3.6.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
