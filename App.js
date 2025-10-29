@@ -9,6 +9,7 @@ import MainContent from './components/MainContent';
 import Footer from './components/Footer';
 import SourceScreen from './screens/SourceScreen';
 import SearchScreen from './screens/SearchScreen';
+import AllSourcesScreen from './screens/AllSourcesScreen';
 import { styles } from './styles';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -120,6 +121,14 @@ export default function App() {
           }}
         >
           {() => <SearchScreen importedData={importedData} />}
+        </Drawer.Screen>
+        <Drawer.Screen
+          name="All"
+          options={{
+            drawerIcon: () => <Ionicons name="library" size={24} color="#55cdff" />
+          }}
+        >
+          {() => <AllSourcesScreen importedData={importedData} />}
         </Drawer.Screen>
         {sources.map((source) => (
           <Drawer.Screen key={source} name={source}>
