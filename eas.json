@@ -12,7 +12,10 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "android": {
+        "autoIncrement": true,
+        "credentialsSource": "local"
+      }
     }
   },
   "submit": {
