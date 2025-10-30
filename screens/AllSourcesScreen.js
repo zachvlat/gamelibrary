@@ -3,7 +3,7 @@ import { View, Text, FlatList, Image, ScrollView, TouchableOpacity } from 'react
 import { styles } from '../styles';
 
 export default function AllSourcesScreen({ importedData }) {
-    const [sortOption, setSortOption] = useState('alphabetical');
+    const [sortOption, setSortOption] = useState('communityScore');
     
     const sortedGames = [...importedData].sort((a, b) => {
         switch (sortOption) {
