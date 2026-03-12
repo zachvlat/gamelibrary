@@ -50,25 +50,36 @@ export default function App() {
     return [...new Set(importedData.map((game) => game.Sources).filter(Boolean))];
   }, [importedData]);
 
-  const handleImport = async () => {
+  const handleImport = async (uri) => {
     try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: 'application/json',
-      });
-
-      if (result.assets && result.assets.length > 0) {
-        const file = result.assets[0];
-        const fileContent = await fetch(file.uri).then((res) => res.text());
-        const parsed = JSON.parse(fileContent);
-        if (Array.isArray(parsed)) {
-          setImportedData(parsed);
-          await FileSystem.writeAsStringAsync(DATA_FILE_PATH, JSON.stringify(parsed)); // Write to file
-        } else {
-          console.warn('Imported file is not a valid array.');
-        }
+      const fileContent = await fetch(uri).then((res) => res.text());
+      const parsed = JSON.parse(fileContent);
+      if (Array.isArray(parsed)) {
+        setImportedData(parsed);
+        await FileSystem.writeAsStringAsync(DATA_FILE_PATH, JSON.stringify(parsed));
+      } else {
+        console.warn('Imported file is not a valid array.');
       }
     } catch (error) {
       console.error('Failed to import JSON:', error);
+    }
+  };
+
+  const handleImportUrl = async (url) => {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const parsed = await response.json();
+      if (Array.isArray(parsed)) {
+        setImportedData(parsed);
+        await FileSystem.writeAsStringAsync(DATA_FILE_PATH, JSON.stringify(parsed));
+      } else {
+        console.warn('Imported file is not a valid array.');
+      }
+    } catch (error) {
+      console.error('Failed to import from URL:', error);
     }
   };
 
@@ -76,7 +87,7 @@ export default function App() {
     return (
       <View style={styles.screenContainer}>
         <MainContent importedData={importedData} />
-        <Footer onImport={handleImport} />
+        <Footer onImport={handleImport} onImportUrl={handleImportUrl} />
       </View>
     );
   }
