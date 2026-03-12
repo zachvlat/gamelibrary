@@ -103,9 +103,9 @@ sourceText: {
   marginTop: 4,
 },
 chipContainer: {
-    paddingVertical: 10,
-    marginBottom: 5,
-    marginTop: 5,
+    paddingVertical: 15,
+    marginBottom: 15,
+    marginTop: 15,
 },
 chipContentContainer: {
     paddingHorizontal: 10,
@@ -113,7 +113,7 @@ chipContentContainer: {
 },
 chip: {
     paddingHorizontal: 15,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderRadius: 0,
     backgroundColor: '#2d3138',
     marginHorizontal: 5,
@@ -126,7 +126,7 @@ chipText: {
     fontSize: 14,
 },
 chipTextActive: {
-    fontWeight: 'bold',
+    fontWeight: 'light',
 },
   fabContainer: {
     position: 'absolute',

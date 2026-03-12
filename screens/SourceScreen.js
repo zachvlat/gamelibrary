@@ -40,7 +40,7 @@ export default function SourceScreen({ source, importedData }) {
             <ScrollView 
                 horizontal 
                 showsHorizontalScrollIndicator={false}
-                style={styles.chipContainer}
+                style={{...styles.chipContainer, height: 100, flex: 0}}
                 contentContainerStyle={styles.chipContentContainer}
             >
                 {sortOptions.map((option) => (
