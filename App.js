@@ -27,19 +27,42 @@ const DATA_FILE_PATH = FileSystem.documentDirectory + 'importedData.json';
 
 export default function App() {
   const [importedData, setImportedData] = useState([]);
+  const [sourceUrl, setSourceUrl] = useState(null);
 
-  // Load saved data on app start
+  // Load saved data and re-fetch from URL on app start
   useEffect(() => {
     const loadData = async () => {
       try {
-        const fileInfo = await FileSystem.getInfoAsync(DATA_FILE_PATH);
-        if (fileInfo.exists) {
-          const fileContent = await FileSystem.readAsStringAsync(DATA_FILE_PATH);
-          const parsed = JSON.parse(fileContent);
-          setImportedData(parsed);
+        const urlFilePath = FileSystem.documentDirectory + 'sourceUrl.json';
+        const urlFileInfo = await FileSystem.getInfoAsync(urlFilePath);
+        
+        let savedUrl = null;
+        if (urlFileInfo.exists) {
+          const urlContent = await FileSystem.readAsStringAsync(urlFilePath);
+          const { url } = JSON.parse(urlContent);
+          savedUrl = url;
+          setSourceUrl(url);
+        }
+
+        if (savedUrl) {
+          const response = await fetch(savedUrl);
+          if (response.ok) {
+            const parsed = await response.json();
+            if (Array.isArray(parsed)) {
+              setImportedData(parsed);
+              await FileSystem.writeAsStringAsync(DATA_FILE_PATH, JSON.stringify(parsed));
+            }
+          }
+        } else {
+          const fileInfo = await FileSystem.getInfoAsync(DATA_FILE_PATH);
+          if (fileInfo.exists) {
+            const fileContent = await FileSystem.readAsStringAsync(DATA_FILE_PATH);
+            const parsed = JSON.parse(fileContent);
+            setImportedData(parsed);
+          }
         }
       } catch (error) {
-        console.error('Failed to load stored data:', error);
+        console.error('Failed to load data:', error);
       }
     };
 
@@ -74,7 +97,12 @@ export default function App() {
       const parsed = await response.json();
       if (Array.isArray(parsed)) {
         setImportedData(parsed);
+        setSourceUrl(url);
         await FileSystem.writeAsStringAsync(DATA_FILE_PATH, JSON.stringify(parsed));
+        await FileSystem.writeAsStringAsync(
+          FileSystem.documentDirectory + 'sourceUrl.json',
+          JSON.stringify({ url })
+        );
       } else {
         console.warn('Imported file is not a valid array.');
       }
