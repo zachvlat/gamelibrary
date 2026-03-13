@@ -15,6 +15,7 @@
       "supportsTablet": true
     },
     "android": {
+      "versionCode": 10,
       "adaptiveIcon": {
         "foregroundImage": "./assets/android/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
         "backgroundImage": "./assets/android/res/mipmap-xxxhdpi/ic_launcher_background.png",
