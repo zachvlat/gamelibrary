@@ -103,9 +103,9 @@ sourceText: {
   marginTop: 4,
 },
 chipContainer: {
-    paddingVertical: 15,
-    marginBottom: 15,
-    marginTop: 15,
+    paddingVertical: 0,
+    marginBottom: 0,
+    marginTop: 0,
 },
 chipContentContainer: {
     paddingHorizontal: 10,

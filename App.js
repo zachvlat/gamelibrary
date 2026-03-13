@@ -52,7 +52,7 @@ export default function App() {
 
   const handleImport = async (uri) => {
     try {
-      const fileContent = await fetch(uri).then((res) => res.text());
+      const fileContent = await FileSystem.readAsStringAsync(uri);
       const parsed = JSON.parse(fileContent);
       if (Array.isArray(parsed)) {
         setImportedData(parsed);
