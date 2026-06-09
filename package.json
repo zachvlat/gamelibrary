@@ -14,7 +14,7 @@
     "@react-native-masked-view/masked-view": "0.3.2",
     "@react-navigation/drawer": "^7.3.12",
     "@react-navigation/native": "^7.1.9",
-    "expo": "~55.0.23",
+    "expo": "~55.0.26",
     "expo-document-picker": "~55.0.13",
     "expo-file-system": "~55.0.10",
     "expo-status-bar": "~55.0.6",
