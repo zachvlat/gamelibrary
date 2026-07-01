@@ -19,6 +19,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,6 +30,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -75,10 +78,13 @@ fun StoreScreen(
     var statusMessage by remember { mutableStateOf<String?>(null) }
     var sortOption by remember { mutableStateOf(SortOption.ALPHA_ASC) }
     var showSortMenu by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
-    val displayedGames = remember(games, sortOption) {
-        val sorted = games.toMutableList()
+    val displayedGames = remember(games, sortOption, searchQuery) {
+        val filtered = if (searchQuery.isBlank()) games
+        else games.filter { it.title.contains(searchQuery, ignoreCase = true) }
+        val sorted = filtered.toMutableList()
         when (sortOption) {
             SortOption.ALPHA_ASC -> sorted.sortBy { it.title.lowercase() }
             SortOption.ALPHA_DESC -> sorted.sortByDescending { it.title.lowercase() }
@@ -154,14 +160,10 @@ fun StoreScreen(
                             onClick = {
                                 scope.launch {
                                     isSyncing = true
-                                    statusMessage = null
                                     try {
                                         val result = library.getGamesForStore(store, forceRefresh = true)
                                         onGamesUpdated(result)
-                                        statusMessage = "${result.size} games"
-                                    } catch (e: Exception) {
-                                        statusMessage = "Sync failed: ${e.message}"
-                                    }
+                                    } catch (_: Exception) { }
                                     isSyncing = false
                                 }
                             },
@@ -177,16 +179,25 @@ fun StoreScreen(
                                 Text("Sync new games")
                             }
                         }
-                        val msg = statusMessage
-                        if (msg != null) {
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                msg,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
+                    }
+
+                    item(span = { GridItemSpan(3) }) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 4.dp),
+                            placeholder = { Text("Search games") },
+                            leadingIcon = { Icon(Icons.Default.Search, null) },
+                            trailingIcon = if (searchQuery.isNotEmpty()) {{
+                                IconButton(onClick = { searchQuery = "" }) {
+                                    Icon(Icons.Default.Close, "Clear")
+                                }
+                            }} else null,
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp)
+                        )
                     }
 
                     items(displayedGames, key = { it.appName + it.store.name }) { game ->
@@ -261,7 +272,6 @@ fun StoreScreen(
                             isLoggedIn = true
                             val result = library.getGamesForStore(store, forceRefresh = true)
                             onGamesUpdated(result)
-                            statusMessage = "${result.size} games loaded"
                         } else {
                             statusMessage = "Login failed"
                         }

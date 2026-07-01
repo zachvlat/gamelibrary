@@ -4,5 +4,6 @@ enum class Store {
     EPIC,
     GOG,
     AMAZON,
-    STEAM
+    STEAM,
+    ITCH
 }

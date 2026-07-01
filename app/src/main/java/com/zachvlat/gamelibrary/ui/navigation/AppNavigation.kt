@@ -8,12 +8,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.VideogameAsset
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,8 +31,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.size
+import com.zachvlat.gamelibrary.R
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -54,13 +52,14 @@ import kotlinx.coroutines.launch
 private sealed class DrawerItem(
     val route: String,
     val label: String,
-    val icon: ImageVector
+    val icon: @Composable () -> Unit
 ) {
-    data object Home : DrawerItem("home", "Home", Icons.Default.Home)
-    data object Gog : DrawerItem("gog", "GOG", Icons.Default.Star)
-    data object Epic : DrawerItem("epic", "Epic", Icons.Default.Extension)
-    data object Amazon : DrawerItem("amazon", "Amazon", Icons.Default.Cloud)
-    data object Steam : DrawerItem("steam", "Steam", Icons.Default.VideogameAsset)
+    data object Home : DrawerItem("home", "Home", { Icon(Icons.Default.Home, null) })
+    data object Gog : DrawerItem("gog", "GOG", { Icon(painterResource(R.drawable.ic_gog), null, Modifier.size(24.dp)) })
+    data object Epic : DrawerItem("epic", "Epic", { Icon(painterResource(R.drawable.ic_epic), null, Modifier.size(24.dp)) })
+    data object Amazon : DrawerItem("amazon", "Amazon", { Icon(painterResource(R.drawable.ic_amazon), null, Modifier.size(24.dp)) })
+    data object Steam : DrawerItem("steam", "Steam", { Icon(painterResource(R.drawable.ic_steam), null, Modifier.size(24.dp)) })
+    data object Itch : DrawerItem("itch", "itch.io", { Icon(painterResource(R.drawable.ic_itch), null, Modifier.size(24.dp)) })
 }
 
 private val drawerItems = listOf(
@@ -68,7 +67,8 @@ private val drawerItems = listOf(
     DrawerItem.Gog,
     DrawerItem.Epic,
     DrawerItem.Amazon,
-    DrawerItem.Steam
+    DrawerItem.Steam,
+    DrawerItem.Itch
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,6 +84,7 @@ fun AppNavigation(library: GameLibrary) {
     var epicGames by remember { mutableStateOf<List<GameInfo>>(emptyList()) }
     var amazonGames by remember { mutableStateOf<List<GameInfo>>(emptyList()) }
     var steamGames by remember { mutableStateOf<List<GameInfo>>(emptyList()) }
+    var itchGames by remember { mutableStateOf<List<GameInfo>>(emptyList()) }
 
     LaunchedEffect(Unit) {
         for (store in Store.entries) {
@@ -95,6 +96,7 @@ fun AppNavigation(library: GameLibrary) {
                         Store.EPIC -> epicGames = cached
                         Store.AMAZON -> amazonGames = cached
                         Store.STEAM -> steamGames = cached
+                        Store.ITCH -> itchGames = cached
                     }
                 }
             } catch (_: Exception) { }
@@ -105,18 +107,20 @@ fun AppNavigation(library: GameLibrary) {
         Store.GOG to gogGames,
         Store.EPIC to epicGames,
         Store.AMAZON to amazonGames,
-        Store.STEAM to steamGames
+        Store.STEAM to steamGames,
+        Store.ITCH to itchGames
     )
 
     val isGameDetail = currentRoute.startsWith("game/")
     val title = when {
         isGameDetail -> "Game Details"
-        currentRoute == "home" -> "GameLibrary"
+        currentRoute == "home" -> "GameShelf"
         currentRoute == "gog" -> "GOG"
         currentRoute == "epic" -> "Epic Games"
         currentRoute == "amazon" -> "Amazon Gaming"
         currentRoute == "steam" -> "Steam"
-        else -> "GameLibrary"
+        currentRoute == "itch" -> "itch.io"
+        else -> "GameShelf"
     }
 
     ModalNavigationDrawer(
@@ -124,14 +128,14 @@ fun AppNavigation(library: GameLibrary) {
         drawerContent = {
             ModalDrawerSheet {
                 Text(
-                    "GameLibrary",
+                    "GameShelf",
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(16.dp)
                 )
                 drawerItems.forEach { item ->
                     val selected = currentRoute == item.route
                     NavigationDrawerItem(
-                        icon = { Icon(item.icon, item.label) },
+                        icon = item.icon,
                         label = { Text(item.label) },
                         selected = selected,
                         onClick = {
@@ -222,6 +226,15 @@ fun AppNavigation(library: GameLibrary) {
                         library = library,
                         games = steamGames,
                         onGamesUpdated = { steamGames = it },
+                        onGameClick = onGameClick
+                    )
+                }
+                composable(DrawerItem.Itch.route) {
+                    StoreScreen(
+                        store = Store.ITCH,
+                        library = library,
+                        games = itchGames,
+                        onGamesUpdated = { itchGames = it },
                         onGameClick = onGameClick
                     )
                 }

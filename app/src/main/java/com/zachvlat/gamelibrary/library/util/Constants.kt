@@ -37,3 +37,8 @@ object AmazonConstants {
     const val DEVICE_TYPE = "A2UMVHOX7UP4V7"
     const val ASSOC_HANDLE = "amzn_sonic_games_launcher"
 }
+
+object ItchConstants {
+    const val PURCHASES_URL = "https://itch.io/my-purchases"
+    const val STORE_BASE_URL = "https://itch.io"
+}

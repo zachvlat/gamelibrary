@@ -3,6 +3,7 @@ package com.zachvlat.gamelibrary.library.ui
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.view.ViewGroup
+import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -20,6 +21,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +46,17 @@ fun LoginWebViewDialog(
     var title by remember { mutableStateOf("$store Login") }
     var codeHandled by remember { mutableStateOf(false) }
     var steamPendingCode by remember { mutableStateOf<String?>(null) }
+    var scrapedGamesJson by remember { mutableStateOf<String?>(null) }
+    var jsInjected by remember { mutableStateOf(false) }
+
+    LaunchedEffect(scrapedGamesJson) {
+        val json = scrapedGamesJson
+        if (json != null && !codeHandled) {
+            codeHandled = true
+            onDismiss()
+            onCodeReceived(json)
+        }
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -85,6 +98,16 @@ fun LoginWebViewDialog(
                                 settings.domStorageEnabled = true
                                 settings.userAgentString = settings.userAgentString + " GameLibrary/1.0"
 
+                                if (store == Store.ITCH) {
+                                    class ItchBridge {
+                                        @JavascriptInterface
+                                        fun onGamesScraped(json: String) {
+                                            scrapedGamesJson = json
+                                        }
+                                    }
+                                    addJavascriptInterface(ItchBridge(), "AndroidItchBridge")
+                                }
+
                                 webChromeClient = object : WebChromeClient() {
                                     override fun onReceivedTitle(view: WebView, t: String?) {
                                         title = t ?: "$store Login"
@@ -94,6 +117,9 @@ fun LoginWebViewDialog(
                                 webViewClient = object : WebViewClient() {
                                     override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
                                         isLoading = true
+                                        if (store == Store.ITCH && !url.startsWith("https://itch.io/my-purchases")) {
+                                            jsInjected = false
+                                        }
                                         tryHandleUrl(url, view)
                                     }
 
@@ -106,6 +132,41 @@ fun LoginWebViewDialog(
                                             onDismiss()
                                             onCodeReceived(code)
                                             return
+                                        }
+                                        if (store == Store.ITCH && url.startsWith("https://itch.io/my-purchases") && !jsInjected) {
+                                            jsInjected = true
+                                            val itchJs = """
+                                                (function() {
+                                                    if (window.__itchScrapingStarted) return;
+                                                    window.__itchScrapingStarted = true;
+                                                    let seen = new Map();
+                                                    let lastCount = 0;
+                                                    let sameCount = 0;
+                                                    async function scan() {
+                                                        document.querySelectorAll(".game_cell").forEach(function(cell) {
+                                                            let id = cell.dataset.game_id;
+                                                            let title = cell.querySelector(".game_title a")?.innerText?.trim();
+                                                            let url = cell.querySelector(".game_title a")?.href;
+                                                            let author = cell.querySelector(".game_author a")?.innerText?.trim();
+                                                            let cover = cell.querySelector(".game_thumb img")?.src || cell.querySelector(".game_thumb img")?.dataset?.lazy_src;
+                                                            if (id && !seen.has(id)) {
+                                                                seen.set(id, { id: id, title: title, url: url, author: author, cover: cover });
+                                                            }
+                                                        });
+                                                        window.scrollTo(0, document.body.scrollHeight);
+                                                        let count = seen.size;
+                                                        if (count === lastCount) { sameCount++; } else { sameCount = 0; }
+                                                        lastCount = count;
+                                                        if (sameCount >= 3) {
+                                                            AndroidItchBridge.onGamesScraped(JSON.stringify(Array.from(seen.values())));
+                                                            return;
+                                                        }
+                                                        setTimeout(scan, 1500);
+                                                    }
+                                                    scan();
+                                                })();
+                                            """.trimIndent()
+                                            view.evaluateJavascript(itchJs, null)
                                         }
                                         tryHandleUrl(url, view)
                                     }
@@ -181,6 +242,7 @@ fun LoginWebViewDialog(
                                                         ?.let { java.net.URLDecoder.decode(it, "UTF-8") }
                                                 } else null
                                             }
+                                            Store.ITCH -> null
                                         }
                                     }
                                 }

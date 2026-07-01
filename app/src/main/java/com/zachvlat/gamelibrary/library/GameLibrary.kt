@@ -11,6 +11,7 @@ import com.zachvlat.gamelibrary.library.store.StoreClient
 import com.zachvlat.gamelibrary.library.store.amazon.AmazonStoreClient
 import com.zachvlat.gamelibrary.library.store.epic.EpicStoreClient
 import com.zachvlat.gamelibrary.library.store.gog.GogStoreClient
+import com.zachvlat.gamelibrary.library.store.itch.ItchStoreClient
 import com.zachvlat.gamelibrary.library.store.steam.SteamStoreClient
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpRequestRetry
@@ -28,13 +29,15 @@ class GameLibrary private constructor(
     val epic: EpicStoreClient,
     val gog: GogStoreClient,
     val amazon: AmazonStoreClient,
-    val steam: SteamStoreClient
+    val steam: SteamStoreClient,
+    val itch: ItchStoreClient
 ) {
     val allClients: Map<Store, StoreClient> = mapOf(
         Store.EPIC to epic,
         Store.GOG to gog,
         Store.AMAZON to amazon,
-        Store.STEAM to steam
+        Store.STEAM to steam,
+        Store.ITCH to itch
     )
 
     fun getClient(store: Store): StoreClient = allClients[store]
@@ -136,7 +139,8 @@ class GameLibrary private constructor(
                 epic = EpicStoreClient(httpClient, tokenStorage),
                 gog = GogStoreClient(httpClient, tokenStorage),
                 amazon = AmazonStoreClient(httpClient, tokenStorage),
-                steam = SteamStoreClient(httpClient, tokenStorage)
+                steam = SteamStoreClient(httpClient, tokenStorage),
+                itch = ItchStoreClient(httpClient, tokenStorage)
             )
         }
     }
