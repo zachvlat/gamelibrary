@@ -1,0 +1,5 @@
+Is an app to store your games from multiple sources that you have on several online stores such as GOG, Epic etc.
+
+Visit https://github.com/zachvlat/gamelibrary/blob/android-native-nonplaynite/README.md for more information.
+
+Changelogs: https://github.com/zachvlat/gamelibrary/blob/android-native-nonplaynite/fastlane/metadata/android/en-US/changelogs
