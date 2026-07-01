@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.zachvlat.gamelibrary.library.store.steam.SteamConstants
 import com.zachvlat.gamelibrary.library.model.Store
 
 @Composable
@@ -45,16 +44,28 @@ fun LoginWebViewDialog(
     var isLoading by remember { mutableStateOf(true) }
     var title by remember { mutableStateOf("$store Login") }
     var codeHandled by remember { mutableStateOf(false) }
-    var steamPendingCode by remember { mutableStateOf<String?>(null) }
     var scrapedGamesJson by remember { mutableStateOf<String?>(null) }
+    var steamScrapedGamesJson by remember { mutableStateOf<String?>(null) }
     var jsInjected by remember { mutableStateOf(false) }
+
+    fun handleScrapedJson(json: String) {
+        if (codeHandled) return
+        codeHandled = true
+        onDismiss()
+        onCodeReceived(json)
+    }
 
     LaunchedEffect(scrapedGamesJson) {
         val json = scrapedGamesJson
         if (json != null && !codeHandled) {
-            codeHandled = true
-            onDismiss()
-            onCodeReceived(json)
+            handleScrapedJson(json)
+        }
+    }
+
+    LaunchedEffect(steamScrapedGamesJson) {
+        val json = steamScrapedGamesJson
+        if (json != null && !codeHandled) {
+            handleScrapedJson(json)
         }
     }
 
@@ -98,14 +109,26 @@ fun LoginWebViewDialog(
                                 settings.domStorageEnabled = true
                                 settings.userAgentString = settings.userAgentString + " GameLibrary/1.0"
 
-                                if (store == Store.ITCH) {
-                                    class ItchBridge {
-                                        @JavascriptInterface
-                                        fun onGamesScraped(json: String) {
-                                            scrapedGamesJson = json
+                                when (store) {
+                                    Store.ITCH -> {
+                                        class ItchBridge {
+                                            @JavascriptInterface
+                                            fun onGamesScraped(json: String) {
+                                                scrapedGamesJson = json
+                                            }
                                         }
+                                        addJavascriptInterface(ItchBridge(), "AndroidItchBridge")
                                     }
-                                    addJavascriptInterface(ItchBridge(), "AndroidItchBridge")
+                                    Store.STEAM -> {
+                                        class SteamBridge {
+                                            @JavascriptInterface
+                                            fun onGamesScraped(json: String) {
+                                                steamScrapedGamesJson = json
+                                            }
+                                        }
+                                        addJavascriptInterface(SteamBridge(), "AndroidSteamBridge")
+                                    }
+                                    else -> {}
                                 }
 
                                 webChromeClient = object : WebChromeClient() {
@@ -117,22 +140,24 @@ fun LoginWebViewDialog(
                                 webViewClient = object : WebViewClient() {
                                     override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
                                         isLoading = true
-                                        if (store == Store.ITCH && !url.startsWith("https://itch.io/my-purchases")) {
-                                            jsInjected = false
+                                        when (store) {
+                                            Store.ITCH -> {
+                                                if (!url.startsWith("https://itch.io/my-purchases")) {
+                                                    jsInjected = false
+                                                }
+                                            }
+                                            Store.STEAM -> {
+                                                if (!url.contains("/games/")) {
+                                                    jsInjected = false
+                                                }
+                                            }
+                                            else -> {}
                                         }
                                         tryHandleUrl(url, view)
                                     }
 
                                     override fun onPageFinished(view: WebView, url: String) {
                                         isLoading = false
-                                        if (store == Store.STEAM && steamPendingCode != null && url.startsWith("https://store.steampowered.com")) {
-                                            val code = steamPendingCode!!
-                                            steamPendingCode = null
-                                            codeHandled = true
-                                            onDismiss()
-                                            onCodeReceived(code)
-                                            return
-                                        }
                                         if (store == Store.ITCH && url.startsWith("https://itch.io/my-purchases") && !jsInjected) {
                                             jsInjected = true
                                             val itchJs = """
@@ -168,6 +193,94 @@ fun LoginWebViewDialog(
                                             """.trimIndent()
                                             view.evaluateJavascript(itchJs, null)
                                         }
+                                        if (store == Store.STEAM && url.contains("/games/") && !jsInjected) {
+                                            jsInjected = true
+                                            val steamJs = """
+                                                (function() {
+                                                    var maxAttempts = 10;
+                                                    var attempt = 0;
+                                                    var allGames = [];
+                                                    function findLinks(card, keyword) {
+                                                        var links = card.querySelectorAll("a");
+                                                        for (var j = 0; j < links.length; j++) {
+                                                            if (links[j].href.indexOf(keyword) !== -1) return links[j].href;
+                                                        }
+                                                        return null;
+                                                    }
+                                                    function parseCard(card, index) {
+                                                        var storeLink = card.querySelector('a[href*="store.steampowered.com/app/"]');
+                                                        var storeUrl = storeLink ? storeLink.href : null;
+                                                        var anyAppLink = card.querySelector('a[href*="/app/"]');
+                                                        var appIdMatch = anyAppLink ? anyAppLink.href.match(/\/app\/(\d+)/) : null;
+                                                        var appId = appIdMatch ? appIdMatch[1] : null;
+                                                        var name = null;
+                                                        var nameLink = card.querySelector('a[href*="/app/"]');
+                                                        if (nameLink) {
+                                                            name = nameLink.textContent ? nameLink.textContent.trim() : null;
+                                                        }
+                                                        var imgEl = card.querySelector("img");
+                                                        if (!name && imgEl) {
+                                                            name = imgEl.alt || imgEl.title || null;
+                                                        }
+                                                        var pictureImg = card.querySelector("picture img");
+                                                        var pictureSource = card.querySelector("picture source");
+                                                        var headerImage = pictureImg ? pictureImg.src : (imgEl ? imgEl.src : null);
+                                                        var libraryImage = pictureSource ? pictureSource.srcset : null;
+                                                        var achievementLink = card.querySelector('a[href*="tab=achievements"]');
+                                                        var achievementText = null;
+                                                        if (achievementLink && achievementLink.parentElement) {
+                                                            var sp = achievementLink.parentElement.querySelector("span");
+                                                            if (sp) achievementText = sp.textContent.trim();
+                                                        }
+                                                        var earned = null;
+                                                        var total = null;
+                                                        if (achievementText && achievementText.indexOf("/") !== -1) {
+                                                            var x = achievementText.split("/");
+                                                            earned = parseInt(x[0], 10);
+                                                            total = parseInt(x[1], 10);
+                                                        }
+                                                        var progressBar = card.querySelector('[style*="--percent"]');
+                                                        var percent = progressBar ? parseFloat(progressBar.style.getPropertyValue("--percent")) : null;
+                                                        var user = null;
+                                                        if (achievementLink) {
+                                                            var u = achievementLink.href.match(/steamcommunity\.com\/(?:id|profiles)\/([^/]+)/);
+                                                            user = u ? u[1] : null;
+                                                        }
+                                                        return {
+                                                            appId: appId || ("game_" + index),
+                                                            name: name,
+                                                            storeUrl: storeUrl,
+                                                            headerImage: headerImage,
+                                                            libraryImage: libraryImage,
+                                                            achievements: { earned: earned, total: total, percent: percent },
+                                                            community: { user: user, myAchievements: findLinks(card, "tab=achievements"), globalAchievements: findLinks(card, "/stats/"), groups: findLinks(card, "/search/groups/") },
+                                                            links: { forums: findLinks(card, "/forum/"), officialWebsite: findLinks(card, "/appofficialsite/"), news: findLinks(card, "/news/") }
+                                                        };
+                                                    }
+                                                    function scrape() {
+                                                        attempt++;
+                                                        console.log("[GameShelf Steam] Attempt " + attempt + "/" + maxAttempts);
+                                                        var cards = document.querySelectorAll("div.JeLbcWPaZDg-");
+                                                        if (cards.length === 0) {
+                                                            cards = document.querySelectorAll(".gameListRowItem");
+                                                        }
+                                                        if (cards.length === 0 && attempt < maxAttempts) {
+                                                            setTimeout(scrape, 2000);
+                                                            return;
+                                                        }
+                                                        console.log("[GameShelf Steam] Found " + cards.length + " cards");
+                                                        var games = [];
+                                                        for (var i = 0; i < cards.length; i++) {
+                                                            games.push(parseCard(cards[i], i));
+                                                        }
+                                                        console.log("[GameShelf Steam] Scraped " + games.length + " games");
+                                                        AndroidSteamBridge.onGamesScraped(JSON.stringify(games));
+                                                    }
+                                                    setTimeout(scrape, 2000);
+                                                })();
+                                            """.trimIndent()
+                                            view.evaluateJavascript(steamJs, null)
+                                        }
                                         tryHandleUrl(url, view)
                                     }
 
@@ -180,16 +293,9 @@ fun LoginWebViewDialog(
                                         android.util.Log.d("LoginWebView", "[${store.name}] Nav: $url")
                                         val code = checkForAuthCode(url)
                                         if (code != null) {
-                                            if (store == Store.STEAM) {
-                                                if (steamPendingCode == null) {
-                                                    steamPendingCode = code
-                                                    webView?.loadUrl("https://store.steampowered.com")
-                                                }
-                                            } else {
-                                                codeHandled = true
-                                                onDismiss()
-                                                onCodeReceived(code)
-                                            }
+                                            codeHandled = true
+                                            onDismiss()
+                                            onCodeReceived(code)
                                         } else if (store == Store.EPIC && url.contains("/id/api/redirect")) {
                                             tryReadEpicCodeFromPage(webView)
                                         }
@@ -235,13 +341,7 @@ fun LoginWebViewDialog(
                                                 params.firstOrNull { it.startsWith("openid.oa2.authorization_code=") }
                                                     ?.removePrefix("openid.oa2.authorization_code=")
                                             }
-                                            Store.STEAM -> {
-                                                if (url.startsWith(SteamConstants.REDIRECT_URL.split("?").first())) {
-                                                    params.firstOrNull { it.startsWith("openid.claimed_id=") }
-                                                        ?.removePrefix("openid.claimed_id=")
-                                                        ?.let { java.net.URLDecoder.decode(it, "UTF-8") }
-                                                } else null
-                                            }
+                                            Store.STEAM -> null
                                             Store.ITCH -> null
                                         }
                                     }

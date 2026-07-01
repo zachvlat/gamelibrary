@@ -27,5 +27,5 @@ Built with Jetpack Compose, Ktor, Room, and Material 3 dynamic colors. Auth is h
 - **Epic Games** – OAuth via WebView + entitlement API
 - **GOG** – OAuth via WebView + Galaxy API
 - **Amazon Gaming** – OAuth via WebView + entitlements API (device-auth flow)
-- **Steam** - (not working currently)
+- **Steam** – JS scrape via WebView (prompts for username, scrapes games page)
 - **Itch.io** - Scrape via WebView

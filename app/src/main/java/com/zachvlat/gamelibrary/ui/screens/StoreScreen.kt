@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -75,6 +76,8 @@ fun StoreScreen(
     var isSyncing by remember { mutableStateOf(false) }
     var loginUrl by remember { mutableStateOf("") }
     var showLoginDialog by remember { mutableStateOf(false) }
+    var showSteamUsernameDialog by remember { mutableStateOf(false) }
+    var steamUsername by remember { mutableStateOf("") }
     var statusMessage by remember { mutableStateOf<String?>(null) }
     var sortOption by remember { mutableStateOf(SortOption.ALPHA_ASC) }
     var showSortMenu by remember { mutableStateOf(false) }
@@ -125,16 +128,21 @@ fun StoreScreen(
                     )
                     Spacer(Modifier.height(16.dp))
                     FilledTonalButton(onClick = {
-                        scope.launch {
-                            isLoading = true
-                            try {
-                                val data = library.getClient(store).getLoginData()
-                                loginUrl = data.url
-                                showLoginDialog = true
-                            } catch (e: Exception) {
-                                statusMessage = "Error: ${e.message}"
+                        if (store == Store.STEAM) {
+                            steamUsername = ""
+                            showSteamUsernameDialog = true
+                        } else {
+                            scope.launch {
+                                isLoading = true
+                                try {
+                                    val data = library.getClient(store).getLoginData()
+                                    loginUrl = data.url
+                                    showLoginDialog = true
+                                } catch (e: Exception) {
+                                    statusMessage = "Error: ${e.message}"
+                                }
+                                isLoading = false
                             }
-                            isLoading = false
                         }
                     }) {
                         Text("Login with ${store.name}")
@@ -279,6 +287,49 @@ fun StoreScreen(
                         statusMessage = "Error: ${e.message}"
                     }
                     isLoading = false
+                }
+            }
+        )
+    }
+
+    if (showSteamUsernameDialog) {
+        AlertDialog(
+            onDismissRequest = { showSteamUsernameDialog = false },
+            title = { Text("Steam Username") },
+            text = {
+                Column {
+                    Text(
+                        "Enter your Steam username or custom ID:",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = steamUsername,
+                        onValueChange = { steamUsername = it },
+                        placeholder = { Text("e.g. steam-name") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val name = steamUsername.trim()
+                        if (name.isNotEmpty()) {
+                            showSteamUsernameDialog = false
+                            loginUrl = "https://steamcommunity.com/id/$name/games/?tab=all"
+                            showLoginDialog = true
+                        }
+                    },
+                    enabled = steamUsername.isNotBlank()
+                ) {
+                    Text("Open Steam")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSteamUsernameDialog = false }) {
+                    Text("Cancel")
                 }
             }
         )

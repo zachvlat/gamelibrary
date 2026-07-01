@@ -75,8 +75,13 @@ class GameLibrary private constructor(
 
         val client = getClient(store)
         val games = client.refreshLibrary()
-        cache.cacheGames(store, games)
-        return games
+        if (games.isNotEmpty()) {
+            cache.cacheGames(store, games)
+            return games
+        }
+
+        val cached = cache.getCachedGames(store)
+        return cached ?: games
     }
 
     suspend fun isLoggedIn(store: Store): Boolean {
