@@ -1,7 +1,9 @@
 # GameLibrary
+<p align="center">
+  <img src="https://raw.githubusercontent.com/zachvlat/gamelibrary/refs/heads/android-native-nonplaynite/app/src/main/play_store_512.png" alt="GameLibrary logo" height="150" />
+</p>
 
 An Android app that aggregates your owned game libraries from Epic Games Store, GOG, and Amazon Gaming into one place.
-
 Built with Jetpack Compose, Ktor, Room, and Material 3 dynamic colors. Auth is handled via in-app WebView popup. Games are cached locally with 7-day TTL.
 
 ## Stores Supported
@@ -10,3 +12,4 @@ Built with Jetpack Compose, Ktor, Room, and Material 3 dynamic colors. Auth is h
 - **GOG** – OAuth via WebView + Galaxy API
 - **Amazon Gaming** – OAuth via WebView + entitlements API (device-auth flow)
 - **Steam** - (not working currently)
+- **Itch.io** - Scrape via WebView
