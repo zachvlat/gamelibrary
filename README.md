@@ -1,10 +1,11 @@
-# GameLibrary
+<h1 align="center">GameShelf</h1>
 <p align="center">
   <img src="https://raw.githubusercontent.com/zachvlat/gamelibrary/refs/heads/android-native-nonplaynite/app/src/main/play_store_512.png" alt="GameLibrary logo" height="150" />
 </p>
-
+<p align="center">
 An Android app that aggregates your owned game libraries from Epic Games Store, GOG, and Amazon Gaming into one place.
 Built with Jetpack Compose, Ktor, Room, and Material 3 dynamic colors. Auth is handled via in-app WebView popup. Games are cached locally with 7-day TTL.
+</p>
 
 ## Stores Supported
 
