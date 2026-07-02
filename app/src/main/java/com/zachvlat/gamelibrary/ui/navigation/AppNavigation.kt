@@ -219,7 +219,7 @@ fun AppNavigation(library: GameLibrary) {
                 modifier = Modifier.padding(padding)
             ) {
                 composable(DrawerItem.Home.route) {
-                    HomeScreen(games = allGames)
+                    HomeScreen(games = allGames, library = library)
                 }
                 composable(DrawerItem.Gog.route) {
                     StoreScreen(
@@ -284,7 +284,7 @@ fun AppNavigation(library: GameLibrary) {
                     val store = try { Store.valueOf(storeName.uppercase()) } catch (_: Exception) { return@composable }
                     val game = allGames[store]?.find { it.appName == appName }
                     if (game != null) {
-                        GameScreen(game = game)
+                        GameScreen(game = game, library = library)
                     } else {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text("Game not found")

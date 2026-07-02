@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
@@ -253,7 +255,7 @@ fun StoreScreen(
                     }
 
                     items(displayedGames, key = { it.appName + it.store.name }) { game ->
-                        GameCard(game = game, onClick = { onGameClick(game) })
+                        GameCard(game = game, library = library, onClick = { onGameClick(game) })
                     }
                 }
 
@@ -439,7 +441,8 @@ fun StoreScreen(
 }
 
 @Composable
-private fun GameCard(game: GameInfo, onClick: () -> Unit) {
+private fun GameCard(game: GameInfo, library: GameLibrary, onClick: () -> Unit) {
+    val isCompleted = library.isCompleted(game.store, game.appName)
     Card(
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
@@ -462,6 +465,21 @@ private fun GameCard(game: GameInfo, onClick: () -> Unit) {
                         contentDescription = game.title,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
+                    )
+                }
+                IconButton(
+                    onClick = { library.toggleCompleted(game.store, game.appName) },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(2.dp)
+                        .size(24.dp)
+                ) {
+                    Icon(
+                        Icons.Default.CheckCircle,
+                        contentDescription = if (isCompleted) "Mark incomplete" else "Mark complete",
+                        tint = if (isCompleted) MaterialTheme.colorScheme.primary
+                               else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
