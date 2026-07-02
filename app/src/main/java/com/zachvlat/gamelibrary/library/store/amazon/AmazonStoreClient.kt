@@ -36,10 +36,6 @@ class AmazonStoreClient(
         return tokenStorage.getToken(store.name, "access_token") != null
     }
 
-    /**
-     * Returns the Amazon login URL using PKCE-based device grant.
-     * Based on nile's implementation.
-     */
     override suspend fun getLoginData(): LoginData {
         val serial = UUID.randomUUID().toString().replace("-", "").uppercase()
         currentSerial = serial
@@ -89,10 +85,6 @@ class AmazonStoreClient(
         return LoginData(url = authUrl)
     }
 
-    /**
-     * Completes login by exchanging the authorization code from the redirect URL.
-     * The authCode should be the full redirect URL containing openid.oa2.authorization_code.
-     */
     override suspend fun completeLogin(authCode: String): Boolean {
         val code = if (authCode.contains("openid.oa2.authorization_code=")) {
             val params = authCode.split("?").lastOrNull()?.split("&") ?: listOf(authCode)

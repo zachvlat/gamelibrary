@@ -3,6 +3,7 @@ package com.zachvlat.gamelibrary.library.ui
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.view.ViewGroup
+import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebView
@@ -51,6 +52,9 @@ fun LoginWebViewDialog(
     fun handleScrapedJson(json: String) {
         if (codeHandled) return
         codeHandled = true
+        if (store == Store.STEAM || store == Store.ITCH) {
+            CookieManager.getInstance().flush()
+        }
         onDismiss()
         onCodeReceived(json)
     }
@@ -183,7 +187,8 @@ fun LoginWebViewDialog(
                                                         if (count === lastCount) { sameCount++; } else { sameCount = 0; }
                                                         lastCount = count;
                                                         if (sameCount >= 3) {
-                                                            AndroidItchBridge.onGamesScraped(JSON.stringify(Array.from(seen.values())));
+                                                            var result = { games: Array.from(seen.values()), purchasesUrl: window.location.href };
+                                                            AndroidItchBridge.onGamesScraped(JSON.stringify(result));
                                                             return;
                                                         }
                                                         setTimeout(scan, 1500);
@@ -274,7 +279,8 @@ fun LoginWebViewDialog(
                                                             games.push(parseCard(cards[i], i));
                                                         }
                                                         console.log("[GameShelf Steam] Scraped " + games.length + " games");
-                                                        AndroidSteamBridge.onGamesScraped(JSON.stringify(games));
+                                                        var result = { games: games, profileUrl: window.location.href };
+                                                        AndroidSteamBridge.onGamesScraped(JSON.stringify(result));
                                                     }
                                                     setTimeout(scrape, 2000);
                                                 })();

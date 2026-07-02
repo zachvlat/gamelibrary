@@ -53,6 +53,8 @@ import coil.compose.AsyncImage
 import com.zachvlat.gamelibrary.library.GameLibrary
 import com.zachvlat.gamelibrary.library.model.GameInfo
 import com.zachvlat.gamelibrary.library.model.Store
+import com.zachvlat.gamelibrary.library.ui.AutoSyncWebViewDialog
+import com.zachvlat.gamelibrary.library.ui.ItchAutoSyncWebViewDialog
 import com.zachvlat.gamelibrary.library.ui.LoginWebViewDialog
 import kotlinx.coroutines.launch
 
@@ -82,6 +84,10 @@ fun StoreScreen(
     var sortOption by remember { mutableStateOf(SortOption.ALPHA_ASC) }
     var showSortMenu by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
+    var showAutoSyncDialog by remember { mutableStateOf(false) }
+    var autoSyncUrl by remember { mutableStateOf("") }
+    var showItchAutoSyncDialog by remember { mutableStateOf(false) }
+    var itchAutoSyncUrl by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
     val displayedGames = remember(games, sortOption, searchQuery) {
@@ -116,7 +122,7 @@ fun StoreScreen(
                 )
             }
 
-            !isLoggedIn && games.isEmpty() -> {
+            !isLoggedIn -> {
                 Column(
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -166,13 +172,51 @@ fun StoreScreen(
                     item(span = { GridItemSpan(3) }) {
                         FilledTonalButton(
                             onClick = {
-                                scope.launch {
-                                    isSyncing = true
-                                    try {
-                                        val result = library.getGamesForStore(store, forceRefresh = true)
-                                        onGamesUpdated(result)
-                                    } catch (_: Exception) { }
-                                    isSyncing = false
+                                when (store) {
+                                    Store.STEAM -> {
+                                        scope.launch {
+                                            isSyncing = true
+                                            val savedUrl = library.steam.getProfileUrl()
+                                            if (savedUrl != null) {
+                                                autoSyncUrl = savedUrl
+                                                showAutoSyncDialog = true
+                                                isSyncing = false
+                                            } else {
+                                                try {
+                                                    val result = library.getGamesForStore(store, forceRefresh = true)
+                                                    onGamesUpdated(result)
+                                                } catch (_: Exception) { }
+                                                isSyncing = false
+                                            }
+                                        }
+                                    }
+                                    Store.ITCH -> {
+                                        scope.launch {
+                                            isSyncing = true
+                                            val savedUrl = library.itch.getPurchasesUrl()
+                                            if (savedUrl != null) {
+                                                itchAutoSyncUrl = savedUrl
+                                                showItchAutoSyncDialog = true
+                                                isSyncing = false
+                                            } else {
+                                                try {
+                                                    val result = library.getGamesForStore(store, forceRefresh = true)
+                                                    onGamesUpdated(result)
+                                                } catch (_: Exception) { }
+                                                isSyncing = false
+                                            }
+                                        }
+                                    }
+                                    else -> {
+                                        scope.launch {
+                                            isSyncing = true
+                                            try {
+                                                val result = library.getGamesForStore(store, forceRefresh = true)
+                                                onGamesUpdated(result)
+                                            } catch (_: Exception) { }
+                                            isSyncing = false
+                                        }
+                                    }
                                 }
                             },
                             enabled = !isSyncing,
@@ -287,6 +331,64 @@ fun StoreScreen(
                         statusMessage = "Error: ${e.message}"
                     }
                     isLoading = false
+                }
+            }
+        )
+    }
+
+    if (showAutoSyncDialog && autoSyncUrl.isNotEmpty()) {
+        AutoSyncWebViewDialog(
+            url = autoSyncUrl,
+            onDismiss = {
+                showAutoSyncDialog = false
+                autoSyncUrl = ""
+            },
+            onGamesScraped = { json ->
+                showAutoSyncDialog = false
+                autoSyncUrl = ""
+                scope.launch {
+                    isSyncing = true
+                    try {
+                        val ok = library.steam.completeLogin(json)
+                        if (ok) {
+                            val result = library.getGamesForStore(store, forceRefresh = true)
+                            onGamesUpdated(result)
+                        } else {
+                            statusMessage = "Sync failed — please log in again"
+                        }
+                    } catch (e: Exception) {
+                        statusMessage = "Error: ${e.message}"
+                    }
+                    isSyncing = false
+                }
+            }
+        )
+    }
+
+    if (showItchAutoSyncDialog && itchAutoSyncUrl.isNotEmpty()) {
+        ItchAutoSyncWebViewDialog(
+            url = itchAutoSyncUrl,
+            onDismiss = {
+                showItchAutoSyncDialog = false
+                itchAutoSyncUrl = ""
+            },
+            onGamesScraped = { json ->
+                showItchAutoSyncDialog = false
+                itchAutoSyncUrl = ""
+                scope.launch {
+                    isSyncing = true
+                    try {
+                        val ok = library.itch.completeLogin(json)
+                        if (ok) {
+                            val result = library.getGamesForStore(store, forceRefresh = true)
+                            onGamesUpdated(result)
+                        } else {
+                            statusMessage = "Sync failed — please log in again"
+                        }
+                    } catch (e: Exception) {
+                        statusMessage = "Error: ${e.message}"
+                    }
+                    isSyncing = false
                 }
             }
         )

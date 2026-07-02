@@ -34,10 +34,6 @@ class EpicStoreClient(
         return tokenStorage.getToken(store.name, "access_token") != null
     }
 
-    /**
-     * Returns the Epic Games login URL.
-     * User logs in via browser, then pastes the redirect URL they were sent to.
-     */
     override suspend fun getLoginData(): LoginData {
         val redirectUrl = buildString {
             append(EpicConstants.REDIRECT_URL)
@@ -52,13 +48,6 @@ class EpicStoreClient(
         return LoginData(url = loginUrl)
     }
 
-    /**
-     * Exchanges the authorization code from the redirect URL for tokens.
-     * The authCode should be the full redirect URL containing ?authorizationCode=...
-     * or just the code itself.
-     *
-     * Uses HTTP Basic Auth with the legendary client credentials.
-     */
     override suspend fun completeLogin(authCode: String): Boolean {
         val code = if (authCode.contains("authorizationCode=")) {
             val pairs = authCode.split("?").lastOrNull()?.split("&") ?: listOf(authCode)
@@ -99,12 +88,6 @@ class EpicStoreClient(
         return true
     }
 
-    /**
-     * Fetches library items from Epic's library service, then enriches with catalog metadata.
-     *
-     * Based on legendary's implementation:
-     * https://github.com/derrod/legendary/blob/master/legendary/api/egs.py
-     */
     override suspend fun refreshLibrary(): List<GameInfo> {
         val accessToken = tokenStorage.getToken(store.name, "access_token")
             ?: throw IllegalStateException("Not authenticated with Epic")

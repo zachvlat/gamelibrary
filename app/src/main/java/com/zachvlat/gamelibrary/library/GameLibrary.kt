@@ -25,7 +25,7 @@ import kotlinx.serialization.json.Json
 class GameLibrary private constructor(
     private val httpClient: HttpClient,
     private val tokenStorage: TokenStorage,
-    private val cache: LibraryCache,
+    private var cache: LibraryCache,
     val epic: EpicStoreClient,
     val gog: GogStoreClient,
     val amazon: AmazonStoreClient,
@@ -58,7 +58,6 @@ class GameLibrary private constructor(
                     result[store] = games
                 }
             } catch (_: Exception) {
-                // store unavailable or auth expired
             }
         }
         return result
@@ -104,6 +103,12 @@ class GameLibrary private constructor(
 
     fun destroy() {
         httpClient.close()
+    }
+
+    fun recreateCache(context: Context) {
+        AppDatabase.closeAndClearInstance()
+        val database = AppDatabase.getInstance(context)
+        cache = LibraryCache(database)
     }
 
     companion object {
