@@ -12,10 +12,13 @@
 <br>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/zachvlat/gamelibrary/refs/heads/android-native-nonplaynite/fastlane/metadata/android/en-US/images/phoneScreenshots/Screenshot1.png" alt="main" height="400" />
-  <img src="https://raw.githubusercontent.com/zachvlat/gamelibrary/refs/heads/android-native-nonplaynite/fastlane/metadata/android/en-US/images/phoneScreenshots/Screenshot2.png" alt="main" height="400" />
-  <img src="https://raw.githubusercontent.com/zachvlat/gamelibrary/refs/heads/android-native-nonplaynite/fastlane/metadata/android/en-US/images/phoneScreenshots/Screenshot3.png" alt="main" height="400" />
+  <img height="400" height="2995" alt="IMG_20260704_161420" src="https://github.com/user-attachments/assets/c944ee05-eefb-4e5d-8212-04c6846a3c68" />
+  <img height="400" height="3006" alt="IMG_20260704_161441" src="https://github.com/user-attachments/assets/156ae6bb-8c4d-42ef-bae4-cd62e6b7d452" />
+  <img height="400" height="2996" alt="IMG_20260704_161615" src="https://github.com/user-attachments/assets/5447cecc-fcc7-4df9-a0e3-45fd131148c0" />
 </p>
+
+
+
 
 <p align="center">
 An Android app that aggregates your owned game libraries from Epic Games Store, GOG, and Amazon Gaming into one place.
