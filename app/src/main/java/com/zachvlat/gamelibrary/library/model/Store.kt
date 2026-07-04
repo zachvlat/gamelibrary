@@ -8,5 +8,6 @@ enum class Store {
     GOG,
     AMAZON,
     STEAM,
-    ITCH
+    ITCH,
+    EA
 }

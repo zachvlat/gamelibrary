@@ -73,7 +73,8 @@ private val stores = listOf(
     StoreEntry(Store.EPIC, "Epic", R.drawable.ic_epic),
     StoreEntry(Store.AMAZON, "Amazon", R.drawable.ic_amazon),
     StoreEntry(Store.STEAM, "Steam", R.drawable.ic_steam),
-    StoreEntry(Store.ITCH, "itch.io", R.drawable.ic_itch)
+    StoreEntry(Store.ITCH, "itch.io", R.drawable.ic_itch),
+    StoreEntry(Store.EA, "EA", R.drawable.ic_ea)
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -345,6 +346,7 @@ private fun SearchResultRow(game: GameInfo, onClick: () -> Unit) {
             Store.AMAZON -> R.drawable.ic_amazon
             Store.STEAM -> R.drawable.ic_steam
             Store.ITCH -> R.drawable.ic_itch
+            Store.EA -> R.drawable.ic_ea
         }
         Icon(
             painter = painterResource(iconRes),

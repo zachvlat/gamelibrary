@@ -42,3 +42,8 @@ object ItchConstants {
     const val PURCHASES_URL = "https://itch.io/my-purchases"
     const val STORE_BASE_URL = "https://itch.io"
 }
+
+object EaConstants {
+    const val ORDER_HISTORY_URL = "https://myaccount.ea.com/am/data/1/order-history?dateRange=ALL"
+    const val STORE_BASE_URL = "https://www.ea.com/games"
+}

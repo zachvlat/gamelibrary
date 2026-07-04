@@ -47,12 +47,13 @@ fun LoginWebViewDialog(
     var codeHandled by remember { mutableStateOf(false) }
     var scrapedGamesJson by remember { mutableStateOf<String?>(null) }
     var steamScrapedGamesJson by remember { mutableStateOf<String?>(null) }
+    var eaScrapedJson by remember { mutableStateOf<String?>(null) }
     var jsInjected by remember { mutableStateOf(false) }
 
     fun handleScrapedJson(json: String) {
         if (codeHandled) return
         codeHandled = true
-        if (store == Store.STEAM || store == Store.ITCH) {
+        if (store == Store.STEAM || store == Store.ITCH || store == Store.EA) {
             CookieManager.getInstance().flush()
         }
         onDismiss()
@@ -68,6 +69,13 @@ fun LoginWebViewDialog(
 
     LaunchedEffect(steamScrapedGamesJson) {
         val json = steamScrapedGamesJson
+        if (json != null && !codeHandled) {
+            handleScrapedJson(json)
+        }
+    }
+
+    LaunchedEffect(eaScrapedJson) {
+        val json = eaScrapedJson
         if (json != null && !codeHandled) {
             handleScrapedJson(json)
         }
@@ -132,6 +140,15 @@ fun LoginWebViewDialog(
                                         }
                                         addJavascriptInterface(SteamBridge(), "AndroidSteamBridge")
                                     }
+                                    Store.EA -> {
+                                        class EaBridge {
+                                            @JavascriptInterface
+                                            fun onJsonReceived(json: String) {
+                                                eaScrapedJson = json
+                                            }
+                                        }
+                                        addJavascriptInterface(EaBridge(), "AndroidEaBridge")
+                                    }
                                     else -> {}
                                 }
 
@@ -154,6 +171,9 @@ fun LoginWebViewDialog(
                                                 if (!url.contains("/games/")) {
                                                     jsInjected = false
                                                 }
+                                            }
+                                            Store.EA -> {
+                                                jsInjected = false
                                             }
                                             else -> {}
                                         }
@@ -197,6 +217,20 @@ fun LoginWebViewDialog(
                                                 })();
                                             """.trimIndent()
                                             view.evaluateJavascript(itchJs, null)
+                                        }
+                                        if (store == Store.EA && url.startsWith("https://myaccount.ea.com/am/data/1/order-history") && !jsInjected) {
+                                            jsInjected = true
+                                            val eaJs = """
+                                                (function() {
+                                                    try {
+                                                        var text = document.body ? (document.body.innerText || document.body.textContent || '') : '';
+                                                        if (text.length > 0) {
+                                                            AndroidEaBridge.onJsonReceived(text);
+                                                        }
+                                                    } catch(e) { }
+                                                })();
+                                            """.trimIndent()
+                                            view.evaluateJavascript(eaJs, null)
                                         }
                                         if (store == Store.STEAM && url.contains("/games/") && !jsInjected) {
                                             jsInjected = true
@@ -349,6 +383,7 @@ fun LoginWebViewDialog(
                                             }
                                             Store.STEAM -> null
                                             Store.ITCH -> null
+                                            Store.EA -> null
                                         }
                                     }
                                 }

@@ -13,6 +13,7 @@ import com.zachvlat.gamelibrary.library.store.StoreClient
 import com.zachvlat.gamelibrary.library.store.amazon.AmazonStoreClient
 import com.zachvlat.gamelibrary.library.store.epic.EpicStoreClient
 import com.zachvlat.gamelibrary.library.store.gog.GogStoreClient
+import com.zachvlat.gamelibrary.library.store.ea.EaStoreClient
 import com.zachvlat.gamelibrary.library.store.itch.ItchStoreClient
 import com.zachvlat.gamelibrary.library.store.steam.SteamStoreClient
 import io.ktor.client.HttpClient
@@ -39,7 +40,8 @@ class GameLibrary private constructor(
     val gog: GogStoreClient,
     val amazon: AmazonStoreClient,
     val steam: SteamStoreClient,
-    val itch: ItchStoreClient
+    val itch: ItchStoreClient,
+    val ea: EaStoreClient
 ) {
     private val npJson = Json { ignoreUnknownKeys = true }
 
@@ -104,7 +106,8 @@ class GameLibrary private constructor(
         Store.GOG to gog,
         Store.AMAZON to amazon,
         Store.STEAM to steam,
-        Store.ITCH to itch
+        Store.ITCH to itch,
+        Store.EA to ea
     )
 
     fun getClient(store: Store): StoreClient = allClients[store]
@@ -221,7 +224,8 @@ class GameLibrary private constructor(
                 gog = GogStoreClient(httpClient, tokenStorage),
                 amazon = AmazonStoreClient(httpClient, tokenStorage),
                 steam = SteamStoreClient(httpClient, tokenStorage),
-                itch = ItchStoreClient(httpClient, tokenStorage)
+                itch = ItchStoreClient(httpClient, tokenStorage),
+                ea = EaStoreClient(httpClient, tokenStorage)
             )
         }
     }

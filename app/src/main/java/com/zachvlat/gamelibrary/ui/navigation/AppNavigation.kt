@@ -66,6 +66,7 @@ private sealed class DrawerItem(
     data object Amazon : DrawerItem("amazon", "Amazon", { Icon(painterResource(R.drawable.ic_amazon), null, Modifier.size(24.dp)) })
     data object Steam : DrawerItem("steam", "Steam", { Icon(painterResource(R.drawable.ic_steam), null, Modifier.size(24.dp)) })
     data object Itch : DrawerItem("itch", "itch.io", { Icon(painterResource(R.drawable.ic_itch), null, Modifier.size(24.dp)) })
+    data object Ea : DrawerItem("ea", "EA", { Icon(painterResource(R.drawable.ic_ea), null, Modifier.size(24.dp)) })
     data object Settings : DrawerItem("settings", "Settings", { Icon(Icons.Default.Settings, null) })
 }
 
@@ -75,7 +76,8 @@ private val drawerItems = listOf(
     DrawerItem.Epic,
     DrawerItem.Amazon,
     DrawerItem.Steam,
-    DrawerItem.Itch
+    DrawerItem.Itch,
+    DrawerItem.Ea
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,6 +94,7 @@ fun AppNavigation(library: GameLibrary) {
     var amazonGames by remember { mutableStateOf<List<GameInfo>>(emptyList()) }
     var steamGames by remember { mutableStateOf<List<GameInfo>>(emptyList()) }
     var itchGames by remember { mutableStateOf<List<GameInfo>>(emptyList()) }
+    var eaGames by remember { mutableStateOf<List<GameInfo>>(emptyList()) }
     var refreshKey by remember { mutableStateOf(0) }
 
     LaunchedEffect(refreshKey) {
@@ -105,6 +108,7 @@ fun AppNavigation(library: GameLibrary) {
                         Store.AMAZON -> amazonGames = cached
                         Store.STEAM -> steamGames = cached
                         Store.ITCH -> itchGames = cached
+                        Store.EA -> eaGames = cached
                     }
                 }
             } catch (_: Exception) { }
@@ -116,7 +120,8 @@ fun AppNavigation(library: GameLibrary) {
         Store.EPIC to epicGames,
         Store.AMAZON to amazonGames,
         Store.STEAM to steamGames,
-        Store.ITCH to itchGames
+        Store.ITCH to itchGames,
+        Store.EA to eaGames
     )
 
     val isGameDetail = currentRoute.startsWith("game/")
@@ -128,6 +133,7 @@ fun AppNavigation(library: GameLibrary) {
         currentRoute == "amazon" -> "Amazon Gaming"
         currentRoute == "steam" -> "Steam"
         currentRoute == "itch" -> "itch.io"
+        currentRoute == "ea" -> "EA"
         currentRoute == "settings" -> "Settings"
         else -> "GameShelf"
     }
@@ -263,6 +269,15 @@ fun AppNavigation(library: GameLibrary) {
                         library = library,
                         games = itchGames,
                         onGamesUpdated = { itchGames = it },
+                        onGameClick = onGameClick
+                    )
+                }
+                composable(DrawerItem.Ea.route) {
+                    StoreScreen(
+                        store = Store.EA,
+                        library = library,
+                        games = eaGames,
+                        onGamesUpdated = { eaGames = it },
                         onGameClick = onGameClick
                     )
                 }

@@ -90,6 +90,7 @@ fun StoreScreen(
     var autoSyncUrl by remember { mutableStateOf("") }
     var showItchAutoSyncDialog by remember { mutableStateOf(false) }
     var itchAutoSyncUrl by remember { mutableStateOf("") }
+    var showEaAutoSyncDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     val displayedGames = remember(games, sortOption, searchQuery) {
@@ -208,6 +209,9 @@ fun StoreScreen(
                                                 isSyncing = false
                                             }
                                         }
+                                    }
+                                    Store.EA -> {
+                                        showEaAutoSyncDialog = true
                                     }
                                     else -> {
                                         scope.launch {
@@ -381,6 +385,34 @@ fun StoreScreen(
                     isSyncing = true
                     try {
                         val ok = library.itch.completeLogin(json)
+                        if (ok) {
+                            val result = library.getGamesForStore(store, forceRefresh = true)
+                            onGamesUpdated(result)
+                        } else {
+                            statusMessage = "Sync failed — please log in again"
+                        }
+                    } catch (e: Exception) {
+                        statusMessage = "Error: ${e.message}"
+                    }
+                    isSyncing = false
+                }
+            }
+        )
+    }
+
+    if (showEaAutoSyncDialog) {
+        LoginWebViewDialog(
+            store = Store.EA,
+            authUrl = "https://myaccount.ea.com/am/data/1/order-history?dateRange=ALL",
+            onDismiss = {
+                showEaAutoSyncDialog = false
+            },
+            onCodeReceived = { json ->
+                showEaAutoSyncDialog = false
+                scope.launch {
+                    isSyncing = true
+                    try {
+                        val ok = library.ea.completeLogin(json)
                         if (ok) {
                             val result = library.getGamesForStore(store, forceRefresh = true)
                             onGamesUpdated(result)
