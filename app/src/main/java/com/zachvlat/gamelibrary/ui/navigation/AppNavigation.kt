@@ -219,7 +219,7 @@ fun AppNavigation(library: GameLibrary) {
                 modifier = Modifier.padding(padding)
             ) {
                 composable(DrawerItem.Home.route) {
-                    HomeScreen(games = allGames, library = library)
+                    HomeScreen(games = allGames, library = library, onGameClick = onGameClick)
                 }
                 composable(DrawerItem.Gog.route) {
                     StoreScreen(

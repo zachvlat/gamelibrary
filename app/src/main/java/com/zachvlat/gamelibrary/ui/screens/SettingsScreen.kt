@@ -84,13 +84,6 @@ fun SettingsScreen(
             .padding(24.dp)
     ) {
         Text(
-            "Settings",
-            style = MaterialTheme.typography.headlineLarge
-        )
-
-        Spacer(Modifier.height(32.dp))
-
-        Text(
             "Database Backup",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
