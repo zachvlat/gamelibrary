@@ -17,7 +17,9 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.Parameters
 import io.ktor.http.isSuccess
 import io.ktor.util.encodeBase64
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 
 class EpicStoreClient(
     private val httpClient: HttpClient,
@@ -100,20 +102,24 @@ class EpicStoreClient(
             .filter { it.catalogItemId != null }
             .groupBy { it.namespace }
 
+        Log.d(TAG, "Namespaces: ${byNamespace.size}")
+
+        val metadataResults: Map<String, Map<String, EpicCatalogResponse>> = coroutineScope {
+            byNamespace.map { (namespace: String, nsRecords: List<EpicLibraryRecord>) ->
+                async {
+                    val ids = nsRecords.mapNotNull { it.catalogItemId }
+                    val metadataMap = fetchCatalogMetadataBatch(accessToken, namespace, ids)
+                    namespace to metadataMap
+                }
+            }.awaitAll()
+        }.toMap()
+
         var processed = 0
         val total = records.size
         val games = mutableListOf<GameInfo>()
 
-        Log.d(TAG, "Namespaces: ${byNamespace.size}")
-        var nsIndex = 0
-        for ((namespace, nsRecords) in byNamespace) {
-            nsIndex++
-            val ids = nsRecords.mapNotNull { it.catalogItemId }
-            Log.d(TAG, "[$nsIndex/${byNamespace.size}] Namespace '$namespace': ${ids.size} items")
-            val metadataMap = fetchCatalogMetadataBatch(accessToken, namespace, ids)
-            Log.d(TAG, "   -> got ${metadataMap.size} metadata entries")
-            if (nsIndex < byNamespace.size) delay(250)
-
+        for ((namespace: String, nsRecords: List<EpicLibraryRecord>) in byNamespace) {
+            val metadataMap = metadataResults.getValue(namespace)
             for (record in nsRecords) {
                 val catalogItemId = record.catalogItemId ?: continue
                 processed++
