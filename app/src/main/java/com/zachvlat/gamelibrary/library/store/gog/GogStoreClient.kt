@@ -13,6 +13,12 @@ import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.isSuccess
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
+
 class GogStoreClient(
     private val httpClient: HttpClient,
     private val tokenStorage: TokenStorage
@@ -67,28 +73,71 @@ class GogStoreClient(
         }
     }
 
+    private suspend fun tryRefreshToken(): Boolean {
+        val refreshToken = tokenStorage.getToken(store.name, "refresh_token") ?: return false
+        return try {
+            val response: HttpResponse = httpClient.get(GogConstants.TOKEN_URL) {
+                parameter("client_id", GogConstants.CLIENT_ID)
+                parameter("client_secret", GogConstants.CLIENT_SECRET)
+                parameter("grant_type", "refresh_token")
+                parameter("refresh_token", refreshToken)
+                parameter("redirect_uri", GogConstants.REDIRECT_URI)
+            }
+
+            if (!response.status.isSuccess()) return false
+
+            val tokenResponse: GogTokenResponse = response.body()
+            tokenStorage.saveToken(store.name, "access_token", tokenResponse.accessToken)
+            tokenStorage.saveToken(store.name, "expires_in", tokenResponse.expiresIn.toString())
+            tokenStorage.saveToken(store.name, "token_type", tokenResponse.tokenType)
+            if (tokenResponse.refreshToken != null) {
+                tokenStorage.saveToken(store.name, "refresh_token", tokenResponse.refreshToken)
+            }
+            println("[GOG] Token refreshed successfully")
+            true
+        } catch (e: Exception) {
+            println("[GOG] Token refresh failed: ${e.message}")
+            false
+        }
+    }
+
     override suspend fun refreshLibrary(): List<GameInfo> {
-        val accessToken = tokenStorage.getToken(store.name, "access_token")
+        var accessToken = tokenStorage.getToken(store.name, "access_token")
             ?: throw IllegalStateException("Not authenticated with GOG")
 
         val userId = tokenStorage.getToken(store.name, "user_id")
             ?: throw IllegalStateException("User ID not found")
 
         println("[GOG] Fetching library releases...")
-        val externalIds = fetchLibraryReleases(accessToken, userId)
+        val externalIds = try {
+            fetchLibraryReleases(accessToken, userId)
+        } catch (e: Exception) {
+            println("[GOG] Library fetch failed, attempting token refresh: ${e.message}")
+            if (tryRefreshToken()) {
+                accessToken = tokenStorage.getToken(store.name, "access_token")!!
+                fetchLibraryReleases(accessToken, userId)
+            } else {
+                throw IllegalStateException("Session expired. Please log in again.")
+            }
+        }
         println("[GOG] Found ${externalIds.size} releases, fetching metadata...")
 
-        val games = mutableListOf<GameInfo>()
-
-        for ((i, item) in externalIds.withIndex()) {
-            try {
-                println("[GOG] [${i + 1}/${externalIds.size}] ${item.externalId}")
-                val metadata = fetchGameMetadata(accessToken, item.externalId, item.certificate)
-                if (metadata != null) {
-                    val gameInfo = normalizeMetadata(metadata, item.externalId)
-                    gameInfo?.let { games.add(it) }
+        val games = coroutineScope {
+            val semaphore = Semaphore(10)
+            externalIds.mapIndexed { i, item ->
+                async {
+                    semaphore.withPermit {
+                        try {
+                            val metadata = fetchGameMetadata(accessToken, item.externalId, item.certificate)
+                            if (metadata != null) {
+                                normalizeMetadata(metadata, item.externalId)
+                            } else null
+                        } catch (_: Exception) {
+                            null
+                        }
+                    }
                 }
-            } catch (_: Exception) { }
+            }.awaitAll().filterNotNull()
         }
 
         println("[GOG] Done — ${games.size} games loaded")

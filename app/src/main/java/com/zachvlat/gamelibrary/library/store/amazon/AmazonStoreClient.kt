@@ -141,31 +141,25 @@ class AmazonStoreClient(
     }
 
     override suspend fun refreshLibrary(): List<GameInfo> {
-        val accessToken = tokenStorage.getToken(store.name, "access_token")
+        var accessToken = tokenStorage.getToken(store.name, "access_token")
             ?: throw IllegalStateException("Not authenticated with Amazon")
 
-        return try {
-            val serial = tokenStorage.getToken(store.name, "device_serial")
-                ?: tokenStorage.getToken(store.name, "serial") ?: ""
-            val hardwareHash = MessageDigest.getInstance("SHA-256")
-                .digest(serial.toByteArray(Charsets.UTF_8))
-                .joinToString("") { "%02x".format(it) }
-                .uppercase()
+        val serial = tokenStorage.getToken(store.name, "device_serial")
+            ?: tokenStorage.getToken(store.name, "serial") ?: ""
+        val hardwareHash = MessageDigest.getInstance("SHA-256")
+            .digest(serial.toByteArray(Charsets.UTF_8))
+            .joinToString("") { "%02x".format(it) }
+            .uppercase()
 
+        return try {
             fetchAndMapEntitlements(accessToken, hardwareHash)
         } catch (e: Exception) {
-            val refreshed = tryRefreshToken()
-            if (refreshed) {
-                val newToken = tokenStorage.getToken(store.name, "access_token") ?: throw e
-                val serial = tokenStorage.getToken(store.name, "device_serial")
-                    ?: tokenStorage.getToken(store.name, "serial") ?: ""
-                val hardwareHash = MessageDigest.getInstance("SHA-256")
-                    .digest(serial.toByteArray(Charsets.UTF_8))
-                    .joinToString("") { "%02x".format(it) }
-                    .uppercase()
-                fetchAndMapEntitlements(newToken, hardwareHash)
+            println("[Amazon] Entitlements fetch failed, attempting token refresh: ${e.message}")
+            if (tryRefreshToken()) {
+                accessToken = tokenStorage.getToken(store.name, "access_token")!!
+                fetchAndMapEntitlements(accessToken, hardwareHash)
             } else {
-                throw e
+                throw IllegalStateException("Session expired. Please log in again.")
             }
         }
     }

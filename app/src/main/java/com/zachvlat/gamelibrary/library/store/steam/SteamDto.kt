@@ -3,35 +3,24 @@ package com.zachvlat.gamelibrary.library.store.steam
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SteamScrapedGame(
-    val appId: String? = null,
-    val name: String? = null,
-    val storeUrl: String? = null,
-    val headerImage: String? = null,
-    val libraryImage: String? = null,
-    val achievements: SteamScrapedAchievements? = null,
-    val community: SteamScrapedCommunity? = null,
-    val links: SteamScrapedLinks? = null
+data class SteamApiGamesResponse(
+    val response: SteamApiGamesData
 )
 
 @Serializable
-data class SteamScrapedAchievements(
-    val earned: Int? = null,
-    val total: Int? = null,
-    val percent: Double? = null
+data class SteamApiGamesData(
+    val games: List<SteamApiGame>? = null,
+    val game_count: Int? = null
 )
 
 @Serializable
-data class SteamScrapedCommunity(
-    val user: String? = null,
-    val myAchievements: String? = null,
-    val globalAchievements: String? = null,
-    val groups: String? = null
-)
-
-@Serializable
-data class SteamScrapedLinks(
-    val forums: String? = null,
-    val officialWebsite: String? = null,
-    val news: String? = null
+data class SteamApiGame(
+    val appid: Int,
+    val name: String,
+    val playtime_forever: Int? = null,
+    val playtime_windows_forever: Int? = null,
+    val playtime_mac_forever: Int? = null,
+    val playtime_linux_forever: Int? = null,
+    val img_icon_url: String? = null,
+    val header_image: String? = null
 )

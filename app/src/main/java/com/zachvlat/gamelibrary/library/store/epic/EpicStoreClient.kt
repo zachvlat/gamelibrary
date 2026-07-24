@@ -90,12 +90,56 @@ class EpicStoreClient(
         return true
     }
 
+    private suspend fun tryRefreshToken(): Boolean {
+        val refreshToken = tokenStorage.getToken(store.name, "refresh_token") ?: return false
+        return try {
+            val basicAuth = "${EpicConstants.CLIENT_ID}:${EpicConstants.CLIENT_SECRET}"
+                .encodeBase64()
+
+            val response: HttpResponse = httpClient.submitForm(
+                url = EpicConstants.TOKEN_URL,
+                formParameters = Parameters.build {
+                    append("grant_type", "refresh_token")
+                    append("refresh_token", refreshToken)
+                    append("token_type", "eg1")
+                }
+            ) {
+                header("Authorization", "Basic $basicAuth")
+                header("User-Agent", "UELauncherClient/3.0.0")
+            }
+
+            if (!response.status.isSuccess()) return false
+
+            val tokenResponse: EpicTokenResponse = response.body()
+            tokenStorage.saveToken(store.name, "access_token", tokenResponse.accessToken)
+            tokenStorage.saveToken(store.name, "expires_in", tokenResponse.expiresIn.toString())
+            if (tokenResponse.refreshToken != null) {
+                tokenStorage.saveToken(store.name, "refresh_token", tokenResponse.refreshToken)
+            }
+            Log.d(TAG, "Token refreshed successfully")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Token refresh failed: ${e.message}")
+            false
+        }
+    }
+
     override suspend fun refreshLibrary(): List<GameInfo> {
-        val accessToken = tokenStorage.getToken(store.name, "access_token")
+        var accessToken = tokenStorage.getToken(store.name, "access_token")
             ?: throw IllegalStateException("Not authenticated with Epic")
 
         Log.d(TAG, "Fetching library records...")
-        val records = fetchLibraryRecords(accessToken)
+        var records = try {
+            fetchLibraryRecords(accessToken)
+        } catch (e: Exception) {
+            Log.w(TAG, "Library fetch failed, attempting token refresh: ${e.message}")
+            if (tryRefreshToken()) {
+                accessToken = tokenStorage.getToken(store.name, "access_token")!!
+                fetchLibraryRecords(accessToken)
+            } else {
+                throw IllegalStateException("Session expired. Please log in again.")
+            }
+        }
         Log.d(TAG, "Found ${records.size} library records, fetching metadata...")
 
         val byNamespace = records

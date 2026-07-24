@@ -55,7 +55,6 @@ import coil.compose.AsyncImage
 import com.zachvlat.gamelibrary.library.GameLibrary
 import com.zachvlat.gamelibrary.library.model.GameInfo
 import com.zachvlat.gamelibrary.library.model.Store
-import com.zachvlat.gamelibrary.library.ui.AutoSyncWebViewDialog
 import com.zachvlat.gamelibrary.library.ui.ItchAutoSyncWebViewDialog
 import com.zachvlat.gamelibrary.library.ui.LoginWebViewDialog
 import kotlinx.coroutines.launch
@@ -80,17 +79,16 @@ fun StoreScreen(
     var isSyncing by remember { mutableStateOf(false) }
     var loginUrl by remember { mutableStateOf("") }
     var showLoginDialog by remember { mutableStateOf(false) }
-    var showSteamUsernameDialog by remember { mutableStateOf(false) }
-    var steamUsername by remember { mutableStateOf("") }
     var statusMessage by remember { mutableStateOf<String?>(null) }
     var sortOption by remember { mutableStateOf(SortOption.ALPHA_ASC) }
     var showSortMenu by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
-    var showAutoSyncDialog by remember { mutableStateOf(false) }
-    var autoSyncUrl by remember { mutableStateOf("") }
     var showItchAutoSyncDialog by remember { mutableStateOf(false) }
     var itchAutoSyncUrl by remember { mutableStateOf("") }
     var showEaAutoSyncDialog by remember { mutableStateOf(false) }
+    var showSteamSetupDialog by remember { mutableStateOf(false) }
+    var steamApiKeyInput by remember { mutableStateOf("") }
+    var steamProfileUrlInput by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
     val displayedGames = remember(games, sortOption, searchQuery) {
@@ -138,8 +136,9 @@ fun StoreScreen(
                     Spacer(Modifier.height(16.dp))
                     FilledTonalButton(onClick = {
                         if (store == Store.STEAM) {
-                            steamUsername = ""
-                            showSteamUsernameDialog = true
+                            steamApiKeyInput = ""
+                            steamProfileUrlInput = ""
+                            showSteamSetupDialog = true
                         } else {
                             scope.launch {
                                 isLoading = true
@@ -177,23 +176,29 @@ fun StoreScreen(
                             onClick = {
                                 when (store) {
                                     Store.STEAM -> {
+                                        statusMessage = null
                                         scope.launch {
                                             isSyncing = true
-                                            val savedUrl = library.steam.getProfileUrl()
-                                            if (savedUrl != null) {
-                                                autoSyncUrl = savedUrl
-                                                showAutoSyncDialog = true
-                                                isSyncing = false
-                                            } else {
+                                            val hasApiKey = library.steam.hasApiKey()
+                                            val hasSteamId = library.steam.getSteamId() != null
+                                            if (hasApiKey && hasSteamId) {
                                                 try {
                                                     val result = library.getGamesForStore(store, forceRefresh = true)
                                                     onGamesUpdated(result)
-                                                } catch (_: Exception) { }
+                                                } catch (e: Exception) {
+                                                    statusMessage = "Sync failed: ${e.message}"
+                                                }
                                                 isSyncing = false
+                                            } else {
+                                                isSyncing = false
+                                                steamApiKeyInput = library.steam.getApiKey() ?: ""
+                                                steamProfileUrlInput = library.steam.getProfileUrl() ?: ""
+                                                showSteamSetupDialog = true
                                             }
                                         }
                                     }
                                     Store.ITCH -> {
+                                        statusMessage = null
                                         scope.launch {
                                             isSyncing = true
                                             val savedUrl = library.itch.getPurchasesUrl()
@@ -205,7 +210,9 @@ fun StoreScreen(
                                                 try {
                                                     val result = library.getGamesForStore(store, forceRefresh = true)
                                                     onGamesUpdated(result)
-                                                } catch (_: Exception) { }
+                                                } catch (e: Exception) {
+                                                    statusMessage = "Sync failed: ${e.message}"
+                                                }
                                                 isSyncing = false
                                             }
                                         }
@@ -214,12 +221,15 @@ fun StoreScreen(
                                         showEaAutoSyncDialog = true
                                     }
                                     else -> {
+                                        statusMessage = null
                                         scope.launch {
                                             isSyncing = true
                                             try {
                                                 val result = library.getGamesForStore(store, forceRefresh = true)
                                                 onGamesUpdated(result)
-                                            } catch (_: Exception) { }
+                                            } catch (e: Exception) {
+                                                statusMessage = "Sync failed: ${e.message}"
+                                            }
                                             isSyncing = false
                                         }
                                     }
@@ -236,6 +246,18 @@ fun StoreScreen(
                             } else {
                                 Text("Sync new games")
                             }
+                        }
+                    }
+
+                    val syncMsg = statusMessage
+                    if (syncMsg != null) {
+                        item(span = { GridItemSpan(3) }) {
+                            Text(
+                                syncMsg,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
                         }
                     }
 
@@ -342,35 +364,6 @@ fun StoreScreen(
         )
     }
 
-    if (showAutoSyncDialog && autoSyncUrl.isNotEmpty()) {
-        AutoSyncWebViewDialog(
-            url = autoSyncUrl,
-            onDismiss = {
-                showAutoSyncDialog = false
-                autoSyncUrl = ""
-            },
-            onGamesScraped = { json ->
-                showAutoSyncDialog = false
-                autoSyncUrl = ""
-                scope.launch {
-                    isSyncing = true
-                    try {
-                        val ok = library.steam.completeLogin(json)
-                        if (ok) {
-                            val result = library.getGamesForStore(store, forceRefresh = true)
-                            onGamesUpdated(result)
-                        } else {
-                            statusMessage = "Sync failed — please log in again"
-                        }
-                    } catch (e: Exception) {
-                        statusMessage = "Error: ${e.message}"
-                    }
-                    isSyncing = false
-                }
-            }
-        )
-    }
-
     if (showItchAutoSyncDialog && itchAutoSyncUrl.isNotEmpty()) {
         ItchAutoSyncWebViewDialog(
             url = itchAutoSyncUrl,
@@ -428,21 +421,37 @@ fun StoreScreen(
         )
     }
 
-    if (showSteamUsernameDialog) {
+    if (showSteamSetupDialog) {
         AlertDialog(
-            onDismissRequest = { showSteamUsernameDialog = false },
-            title = { Text("Steam Username") },
+            onDismissRequest = { showSteamSetupDialog = false },
+            title = { Text("Connect Steam") },
             text = {
                 Column {
                     Text(
-                        "Enter your Steam username or custom ID:",
+                        "Enter your Steam Web API key and profile URL to sync your library.",
                         style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        "Get your API key at: https://steamcommunity.com/dev/apikey",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(Modifier.height(12.dp))
                     OutlinedTextField(
-                        value = steamUsername,
-                        onValueChange = { steamUsername = it },
-                        placeholder = { Text("e.g. steam-name") },
+                        value = steamApiKeyInput,
+                        onValueChange = { steamApiKeyInput = it },
+                        label = { Text("API Key") },
+                        placeholder = { Text("Your Steam Web API key") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = steamProfileUrlInput,
+                        onValueChange = { steamProfileUrlInput = it },
+                        label = { Text("Profile URL") },
+                        placeholder = { Text("https://steamcommunity.com/id/yourname") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -451,20 +460,35 @@ fun StoreScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        val name = steamUsername.trim()
-                        if (name.isNotEmpty()) {
-                            showSteamUsernameDialog = false
-                            loginUrl = "https://steamcommunity.com/id/$name/games/?tab=all"
-                            showLoginDialog = true
+                        val key = steamApiKeyInput.trim()
+                        val profileUrl = steamProfileUrlInput.trim()
+                        if (key.isNotEmpty() && profileUrl.isNotEmpty()) {
+                            scope.launch {
+                                showSteamSetupDialog = false
+                                isSyncing = true
+                                try {
+                                    library.steam.setApiKey(key)
+                                    val steamId = library.steam.resolveAndSaveSteamId(profileUrl)
+                                    if (steamId != null) {
+                                        val result = library.getGamesForStore(store, forceRefresh = true)
+                                        onGamesUpdated(result)
+                                    } else {
+                                        statusMessage = "Could not resolve Steam ID from that URL"
+                                    }
+                                } catch (e: Exception) {
+                                    statusMessage = "Error: ${e.message}"
+                                }
+                                isSyncing = false
+                            }
                         }
                     },
-                    enabled = steamUsername.isNotBlank()
+                    enabled = steamApiKeyInput.isNotBlank() && steamProfileUrlInput.isNotBlank()
                 ) {
-                    Text("Open Steam")
+                    Text("Connect")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showSteamUsernameDialog = false }) {
+                TextButton(onClick = { showSteamSetupDialog = false }) {
                     Text("Cancel")
                 }
             }

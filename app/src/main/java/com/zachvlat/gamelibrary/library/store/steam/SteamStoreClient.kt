@@ -7,10 +7,10 @@ import com.zachvlat.gamelibrary.library.model.LoginData
 import com.zachvlat.gamelibrary.library.model.Store
 import com.zachvlat.gamelibrary.library.store.StoreClient
 import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.request.parameter
+import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 
 class SteamStoreClient(
     private val httpClient: HttpClient,
@@ -19,22 +19,38 @@ class SteamStoreClient(
 
     companion object {
         private const val TAG = "SteamStoreClient"
-        private const val KEY_GAMES_JSON = "games_json"
         private const val KEY_PROFILE_URL = "profile_url"
+        private const val KEY_API_KEY = "api_key"
+        private const val KEY_STEAM_ID = "steam_id"
+        private const val STEAM_API_BASE = "https://api.steampowered.com"
     }
 
     override val store: Store get() = Store.STEAM
 
-    private var scrapedGames: List<GameInfo>? = null
+    private var cachedGames: List<GameInfo>? = null
 
     override suspend fun isLoggedIn(): Boolean {
-        val json = tokenStorage.getToken(store.name, KEY_GAMES_JSON)
-        val profileUrl = tokenStorage.getToken(store.name, KEY_PROFILE_URL)
-        return json != null && profileUrl != null
+        return getSteamId() != null
     }
 
     suspend fun getProfileUrl(): String? {
         return tokenStorage.getToken(store.name, KEY_PROFILE_URL)
+    }
+
+    suspend fun hasApiKey(): Boolean {
+        return tokenStorage.getToken(store.name, KEY_API_KEY) != null
+    }
+
+    suspend fun getApiKey(): String? {
+        return tokenStorage.getToken(store.name, KEY_API_KEY)
+    }
+
+    suspend fun setApiKey(apiKey: String) {
+        tokenStorage.saveToken(store.name, KEY_API_KEY, apiKey)
+    }
+
+    suspend fun getSteamId(): String? {
+        return tokenStorage.getToken(store.name, KEY_STEAM_ID)
     }
 
     override suspend fun getLoginData(): LoginData {
@@ -42,86 +58,91 @@ class SteamStoreClient(
     }
 
     override suspend fun completeLogin(authCode: String): Boolean {
-        if (authCode.isBlank()) return false
-        return try {
-            val (gamesJson, profileUrl) = parseSteamResponse(authCode)
-            val steamGames = Json.decodeFromString<List<SteamScrapedGame>>(gamesJson)
-            val gameInfos = steamGames.map { it.toGameInfo() }
-            tokenStorage.saveToken(store.name, KEY_GAMES_JSON, gamesJson)
-            if (profileUrl != null) {
-                tokenStorage.saveToken(store.name, KEY_PROFILE_URL, profileUrl)
-            }
-            scrapedGames = gameInfos
-            Log.d(TAG, "Successfully imported ${gameInfos.size} games")
-            true
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse imported games JSON: ${e.message}", e)
-            false
-        }
+        return false
     }
 
     override suspend fun refreshLibrary(): List<GameInfo> {
-        if (scrapedGames == null) {
-            loadGamesFromStorage()
+        if (hasApiKey() && getSteamId() != null) {
+            val apiGames = fetchGamesViaApi()
+            if (apiGames != null) {
+                cachedGames = apiGames
+                return apiGames
+            }
         }
-        return scrapedGames ?: emptyList()
+        return cachedGames ?: emptyList()
     }
 
     override suspend fun logout() {
         tokenStorage.clearTokens(store.name)
-        scrapedGames = null
+        cachedGames = null
     }
 
-    private suspend fun loadGamesFromStorage() {
-        val json = tokenStorage.getToken(store.name, KEY_GAMES_JSON)
-        if (json != null) {
-            try {
-                val (gamesJson, _) = parseSteamResponse(json)
-                val steamGames = Json.decodeFromString<List<SteamScrapedGame>>(gamesJson)
-                scrapedGames = steamGames.map { it.toGameInfo() }
-                Log.d(TAG, "Loaded ${scrapedGames!!.size} games from storage")
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to decode stored games JSON: ${e.message}", e)
-                tokenStorage.clearTokens(store.name)
-                scrapedGames = null
+    suspend fun resolveAndSaveSteamId(profileUrl: String): String? {
+        tokenStorage.saveToken(store.name, KEY_PROFILE_URL, profileUrl)
+        val steamId = resolveSteamId(profileUrl)
+        if (steamId != null) {
+            tokenStorage.saveToken(store.name, KEY_STEAM_ID, steamId)
+            Log.d(TAG, "Resolved and saved Steam ID: $steamId")
+        }
+        return steamId
+    }
+
+    private suspend fun resolveSteamId(profileUrl: String): String? {
+        return try {
+            val xmlUrl = profileUrl.replace("/games/?tab=all", "")
+                .replace("/games/", "")
+                .trimEnd('/') + "/?xml=1"
+            val response = httpClient.get(xmlUrl)
+            val xml = response.bodyAsText()
+            val match = """<steamID64>(\d+)</steamID64>""".toRegex().find(xml)
+            match?.groupValues?.getOrNull(1)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to resolve Steam ID: ${e.message}", e)
+            null
+        }
+    }
+
+    private suspend fun fetchGamesViaApi(): List<GameInfo>? {
+        return try {
+            val apiKey = getApiKey() ?: return null
+            val steamId = getSteamId() ?: return null
+            val url = "$STEAM_API_BASE/IPlayerService/GetOwnedGames/v1/"
+            val response = httpClient.get(url) {
+                parameter("key", apiKey)
+                parameter("steamid", steamId)
+                parameter("include_appinfo", 1)
+                parameter("format", "json")
             }
-        } else {
-            scrapedGames = null
+            val text = response.bodyAsText()
+            val apiResponse = Json { ignoreUnknownKeys = true }.decodeFromString<SteamApiGamesResponse>(text)
+            val games = apiResponse.response.games ?: emptyList()
+            val gameInfos = games.map { it.toGameInfo() }
+            Log.d(TAG, "Fetched ${gameInfos.size} games via Steam API")
+            gameInfos
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to fetch games via Steam API: ${e.message}", e)
+            null
         }
     }
 
-    private fun parseSteamResponse(raw: String): Pair<String, String?> {
-        val element = Json.parseToJsonElement(raw)
-        return if (element.jsonObject.containsKey("games")) {
-            val games = element.jsonObject["games"]!!.jsonArray.toString()
-            val profileUrl = element.jsonObject["profileUrl"]?.jsonPrimitive?.content
-            Pair(games, profileUrl)
-        } else {
-            Pair(raw, null)
-        }
-    }
-
-    private fun SteamScrapedGame.toGameInfo(): GameInfo {
-        val appId = this.appId
-            ?: (this.storeUrl?.let { """app/(\d+)""".toRegex().find(it)?.groupValues?.getOrNull(1) })
-            ?: "unknown"
-
-        val effectiveStoreUrl = this.storeUrl ?: "https://store.steampowered.com/app/$appId"
+    private fun SteamApiGame.toGameInfo(): GameInfo {
+        val appId = this.appid.toString()
+        val artCover = "https://cdn.akamai.steamstatic.com/steam/apps/$appId/library_600x900.jpg"
 
         return GameInfo(
             store = Store.STEAM,
             appName = appId,
-            title = this.name ?: "Unknown",
+            title = this.name,
             developer = null,
             description = null,
-            artCover = this.libraryImage ?: this.headerImage,
-            artSquare = this.headerImage,
+            artCover = artCover,
+            artSquare = artCover,
             artLogo = null,
             artBackground = null,
             releaseDate = null,
             genres = null,
             canRunOffline = false,
-            storeUrl = effectiveStoreUrl,
+            storeUrl = "https://store.steampowered.com/app/$appId",
             isLinuxNative = false,
             isMacNative = false
         )
