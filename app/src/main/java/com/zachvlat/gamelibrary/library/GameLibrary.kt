@@ -15,6 +15,7 @@ import com.zachvlat.gamelibrary.library.store.epic.EpicStoreClient
 import com.zachvlat.gamelibrary.library.store.gog.GogStoreClient
 import com.zachvlat.gamelibrary.library.store.ea.EaStoreClient
 import com.zachvlat.gamelibrary.library.store.itch.ItchStoreClient
+import com.zachvlat.gamelibrary.library.store.manual.ManualStoreClient
 import com.zachvlat.gamelibrary.library.store.steam.SteamStoreClient
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpRequestRetry
@@ -41,7 +42,8 @@ class GameLibrary private constructor(
     val amazon: AmazonStoreClient,
     val steam: SteamStoreClient,
     val itch: ItchStoreClient,
-    val ea: EaStoreClient
+    val ea: EaStoreClient,
+    val manual: ManualStoreClient
 ) {
     private val npJson = Json { ignoreUnknownKeys = true }
 
@@ -107,7 +109,8 @@ class GameLibrary private constructor(
         Store.AMAZON to amazon,
         Store.STEAM to steam,
         Store.ITCH to itch,
-        Store.EA to ea
+        Store.EA to ea,
+        Store.MANUAL to manual
     )
 
     fun getClient(store: Store): StoreClient = allClients[store]
@@ -171,6 +174,19 @@ class GameLibrary private constructor(
         cache.invalidate(store)
     }
 
+    suspend fun addManualGame(game: GameInfo) {
+        cache.cacheGames(Store.MANUAL, listOf(game))
+    }
+
+    suspend fun updateManualGame(game: GameInfo) {
+        cache.cacheGames(Store.MANUAL, listOf(game))
+    }
+
+    suspend fun deleteManualGame(appName: String) {
+        val games = cache.getCachedGames(Store.MANUAL, ttlMs = Long.MAX_VALUE) ?: return
+        cache.cacheGames(Store.MANUAL, games.filter { it.appName != appName })
+    }
+
     fun destroy() {
         httpClient.close()
     }
@@ -225,7 +241,8 @@ class GameLibrary private constructor(
                 amazon = AmazonStoreClient(httpClient, tokenStorage),
                 steam = SteamStoreClient(httpClient, tokenStorage),
                 itch = ItchStoreClient(httpClient, tokenStorage),
-                ea = EaStoreClient(httpClient, tokenStorage)
+                ea = EaStoreClient(httpClient, tokenStorage),
+                manual = ManualStoreClient(cache)
             )
         }
     }

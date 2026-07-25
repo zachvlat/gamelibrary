@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
@@ -51,6 +52,7 @@ import com.zachvlat.gamelibrary.library.model.GameInfo
 import com.zachvlat.gamelibrary.library.model.Store
 import com.zachvlat.gamelibrary.ui.screens.GameScreen
 import com.zachvlat.gamelibrary.ui.screens.HomeScreen
+import com.zachvlat.gamelibrary.ui.screens.ManualGameFormScreen
 import com.zachvlat.gamelibrary.ui.screens.SettingsScreen
 import com.zachvlat.gamelibrary.ui.screens.StoreScreen
 import kotlinx.coroutines.launch
@@ -67,6 +69,7 @@ private sealed class DrawerItem(
     data object Steam : DrawerItem("steam", "Steam", { Icon(painterResource(R.drawable.ic_steam), null, Modifier.size(24.dp)) })
     data object Itch : DrawerItem("itch", "itch.io", { Icon(painterResource(R.drawable.ic_itch), null, Modifier.size(24.dp)) })
     data object Ea : DrawerItem("ea", "EA", { Icon(painterResource(R.drawable.ic_ea), null, Modifier.size(24.dp)) })
+    data object Manual : DrawerItem("manual", "Manual", { Icon(Icons.Default.Edit, null) })
     data object Settings : DrawerItem("settings", "Settings", { Icon(Icons.Default.Settings, null) })
 }
 
@@ -77,7 +80,8 @@ private val drawerItems = listOf(
     DrawerItem.Amazon,
     DrawerItem.Steam,
     DrawerItem.Itch,
-    DrawerItem.Ea
+    DrawerItem.Ea,
+    DrawerItem.Manual
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,6 +99,7 @@ fun AppNavigation(library: GameLibrary) {
     var steamGames by remember { mutableStateOf<List<GameInfo>>(emptyList()) }
     var itchGames by remember { mutableStateOf<List<GameInfo>>(emptyList()) }
     var eaGames by remember { mutableStateOf<List<GameInfo>>(emptyList()) }
+    var manualGames by remember { mutableStateOf<List<GameInfo>>(emptyList()) }
     var refreshKey by remember { mutableStateOf(0) }
 
     LaunchedEffect(refreshKey) {
@@ -109,6 +114,7 @@ fun AppNavigation(library: GameLibrary) {
                         Store.STEAM -> steamGames = cached
                         Store.ITCH -> itchGames = cached
                         Store.EA -> eaGames = cached
+                        Store.MANUAL -> manualGames = cached
                     }
                 }
             } catch (_: Exception) { }
@@ -121,10 +127,11 @@ fun AppNavigation(library: GameLibrary) {
         Store.AMAZON to amazonGames,
         Store.STEAM to steamGames,
         Store.ITCH to itchGames,
-        Store.EA to eaGames
+        Store.EA to eaGames,
+        Store.MANUAL to manualGames
     )
 
-    val isGameDetail = currentRoute.startsWith("game/")
+    val isGameDetail = currentRoute.startsWith("game/") || currentRoute.startsWith("manual-")
     val title = when {
         isGameDetail -> "Game Details"
         currentRoute == "home" -> "GameShelf"
@@ -134,6 +141,7 @@ fun AppNavigation(library: GameLibrary) {
         currentRoute == "steam" -> "Steam"
         currentRoute == "itch" -> "itch.io"
         currentRoute == "ea" -> "EA"
+        currentRoute == "manual" -> "Manual"
         currentRoute == "settings" -> "Settings"
         else -> "GameShelf"
     }
@@ -280,6 +288,62 @@ fun AppNavigation(library: GameLibrary) {
                         onGamesUpdated = { eaGames = it },
                         onGameClick = onGameClick
                     )
+                }
+                composable(DrawerItem.Manual.route) {
+                    StoreScreen(
+                        store = Store.MANUAL,
+                        library = library,
+                        games = manualGames,
+                        onGamesUpdated = { manualGames = it },
+                        onGameClick = onGameClick,
+                        onAddGame = {
+                            navController.navigate("manual-add")
+                        },
+                        onEditGame = { game ->
+                            navController.navigate("manual-edit/${Uri.encode(game.appName)}")
+                        },
+                        onDeleteGame = { }
+                    )
+                }
+                composable("manual-add") {
+                    ManualGameFormScreen(
+                        library = library,
+                        onSaved = {
+                            scope.launch {
+                                val updated = library.getGamesForStore(Store.MANUAL, forceRefresh = true)
+                                manualGames = updated
+                            }
+                            navController.popBackStack()
+                        },
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+                composable(
+                    route = "manual-edit/{appName}",
+                    arguments = listOf(
+                        navArgument("appName") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val appName = Uri.decode(backStackEntry.arguments?.getString("appName") ?: return@composable)
+                    val game = manualGames.find { it.appName == appName }
+                    if (game != null) {
+                        ManualGameFormScreen(
+                            library = library,
+                            existingGame = game,
+                            onSaved = {
+                                scope.launch {
+                                    val updated = library.getGamesForStore(Store.MANUAL, forceRefresh = true)
+                                    manualGames = updated
+                                }
+                                navController.popBackStack()
+                            },
+                            onBack = { navController.popBackStack() }
+                        )
+                    } else {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("Game not found")
+                        }
+                    }
                 }
                 composable(DrawerItem.Settings.route) {
                     SettingsScreen(

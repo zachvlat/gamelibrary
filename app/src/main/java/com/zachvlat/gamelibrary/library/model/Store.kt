@@ -9,5 +9,6 @@ enum class Store {
     AMAZON,
     STEAM,
     ITCH,
-    EA
+    EA,
+    MANUAL
 }

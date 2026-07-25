@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.AlertDialog
@@ -72,7 +74,10 @@ fun StoreScreen(
     library: GameLibrary,
     games: List<GameInfo>,
     onGamesUpdated: (List<GameInfo>) -> Unit,
-    onGameClick: (GameInfo) -> Unit = {}
+    onGameClick: (GameInfo) -> Unit = {},
+    onAddGame: () -> Unit = {},
+    onEditGame: (GameInfo) -> Unit = {},
+    onDeleteGame: ((GameInfo) -> Unit)? = null
 ) {
     var isLoggedIn by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
@@ -89,6 +94,7 @@ fun StoreScreen(
     var showSteamSetupDialog by remember { mutableStateOf(false) }
     var steamApiKeyInput by remember { mutableStateOf("") }
     var steamProfileUrlInput by remember { mutableStateOf("") }
+    var showDeleteConfirm by remember { mutableStateOf<GameInfo?>(null) }
     val scope = rememberCoroutineScope()
 
     val displayedGames = remember(games, sortOption, searchQuery) {
@@ -105,12 +111,22 @@ fun StoreScreen(
     }
 
     LaunchedEffect(store) {
-        isLoggedIn = library.isLoggedIn(store)
-        if (isLoggedIn && games.isEmpty()) {
-            try {
-                val cached = library.getGamesForStore(store, forceRefresh = false)
-                if (cached.isNotEmpty()) onGamesUpdated(cached)
-            } catch (_: Exception) { }
+        if (store == Store.MANUAL) {
+            isLoggedIn = true
+            if (games.isEmpty()) {
+                try {
+                    val cached = library.getGamesForStore(store, forceRefresh = false)
+                    if (cached.isNotEmpty()) onGamesUpdated(cached)
+                } catch (_: Exception) { }
+            }
+        } else {
+            isLoggedIn = library.isLoggedIn(store)
+            if (isLoggedIn && games.isEmpty()) {
+                try {
+                    val cached = library.getGamesForStore(store, forceRefresh = false)
+                    if (cached.isNotEmpty()) onGamesUpdated(cached)
+                } catch (_: Exception) { }
+            }
         }
         isLoading = false
     }
@@ -172,6 +188,14 @@ fun StoreScreen(
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     item(span = { GridItemSpan(3) }) {
+                        if (store == Store.MANUAL) {
+                            FilledTonalButton(
+                                onClick = onAddGame,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Add game")
+                            }
+                        } else {
                         FilledTonalButton(
                             onClick = {
                                 when (store) {
@@ -247,6 +271,7 @@ fun StoreScreen(
                                 Text("Sync new games")
                             }
                         }
+                        }
                     }
 
                     val syncMsg = statusMessage
@@ -281,7 +306,13 @@ fun StoreScreen(
                     }
 
                     items(displayedGames, key = { it.appName + it.store.name }) { game ->
-                        GameCard(game = game, library = library, onClick = { onGameClick(game) })
+                        GameCard(
+                            game = game,
+                            library = library,
+                            onClick = { onGameClick(game) },
+                            onEdit = if (store == Store.MANUAL) {{ onEditGame(game) }} else null,
+                            onDelete = if (store == Store.MANUAL) {{ showDeleteConfirm = game }} else null
+                        )
                     }
                 }
 
@@ -494,10 +525,40 @@ fun StoreScreen(
             }
         )
     }
+    if (showDeleteConfirm != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = null },
+            title = { Text("Delete Game") },
+            text = { Text("Remove \"${showDeleteConfirm!!.title}\" from your manual library?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    val game = showDeleteConfirm!!
+                    showDeleteConfirm = null
+                    scope.launch {
+                        library.deleteManualGame(game.appName)
+                        onGamesUpdated(games.filter { it.appName != game.appName })
+                    }
+                }) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = null }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 
 @Composable
-private fun GameCard(game: GameInfo, library: GameLibrary, onClick: () -> Unit) {
+private fun GameCard(
+    game: GameInfo,
+    library: GameLibrary,
+    onClick: () -> Unit,
+    onEdit: (() -> Unit)? = null,
+    onDelete: (() -> Unit)? = null
+) {
     val isCompleted = library.isCompleted(game.store, game.appName)
     Card(
         onClick = onClick,
@@ -546,6 +607,33 @@ private fun GameCard(game: GameInfo, library: GameLibrary, onClick: () -> Unit) 
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)
             )
+            if (onEdit != null || onDelete != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp, vertical = 2.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    if (onEdit != null) {
+                        IconButton(onClick = onEdit, modifier = Modifier.size(28.dp)) {
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = "Edit",
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                    if (onDelete != null) {
+                        IconButton(onClick = onDelete, modifier = Modifier.size(28.dp)) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Delete",
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

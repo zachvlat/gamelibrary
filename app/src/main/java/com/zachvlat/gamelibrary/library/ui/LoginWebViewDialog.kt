@@ -272,6 +272,7 @@ fun LoginWebViewDialog(
                                             Store.STEAM -> null
                                             Store.ITCH -> null
                                             Store.EA -> null
+                                            Store.MANUAL -> null
                                         }
                                     }
                                 }

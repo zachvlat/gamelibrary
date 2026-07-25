@@ -347,6 +347,7 @@ private fun SearchResultRow(game: GameInfo, onClick: () -> Unit) {
             Store.STEAM -> R.drawable.ic_steam
             Store.ITCH -> R.drawable.ic_itch
             Store.EA -> R.drawable.ic_ea
+            Store.MANUAL -> R.drawable.ic_manual
         }
         Icon(
             painter = painterResource(iconRes),
