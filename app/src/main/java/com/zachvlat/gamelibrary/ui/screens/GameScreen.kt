@@ -1,5 +1,6 @@
 package com.zachvlat.gamelibrary.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -109,7 +111,14 @@ fun GameScreen(
         MetadataRow("Offline Play", if (game.canRunOffline) "Supported" else "Not supported")
         MetadataRow("Linux", if (game.isLinuxNative) "Native" else "Not supported")
         MetadataRow("Mac", if (game.isMacNative) "Native" else "Not supported")
-        if (game.storeUrl != null) MetadataRow("Store URL", game.storeUrl)
+        if (game.storeUrl != null) {
+            val uriHandler = LocalUriHandler.current
+            MetadataRow(
+                "Store URL",
+                game.storeUrl,
+                onClick = { uriHandler.openUri(game.storeUrl) }
+            )
+        }
 
         if (game.description != null) {
             Spacer(Modifier.height(16.dp))
@@ -211,7 +220,7 @@ fun GameScreen(
 }
 
 @Composable
-private fun MetadataRow(label: String, value: String) {
+private fun MetadataRow(label: String, value: String, onClick: (() -> Unit)? = null) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -228,7 +237,12 @@ private fun MetadataRow(label: String, value: String) {
             text = value,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
-            modifier = Modifier.weight(0.65f)
+            color = if (onClick != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+            modifier = if (onClick != null) {
+                Modifier.weight(0.65f).clickable(onClick = onClick)
+            } else {
+                Modifier.weight(0.65f)
+            }
         )
     }
 }

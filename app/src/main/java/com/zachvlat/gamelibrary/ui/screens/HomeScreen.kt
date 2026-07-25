@@ -69,6 +69,8 @@ private data class StoreEntry(
 )
 
 private val stores = listOf(
+    StoreEntry(Store.MANUAL, "Manual", R.drawable.ic_manual),
+    StoreEntry(Store.UBISOFT, "Ubisoft", R.drawable.ic_ubisoft),
     StoreEntry(Store.GOG, "GOG", R.drawable.ic_gog),
     StoreEntry(Store.EPIC, "Epic", R.drawable.ic_epic),
     StoreEntry(Store.AMAZON, "Amazon", R.drawable.ic_amazon),
@@ -348,6 +350,7 @@ private fun SearchResultRow(game: GameInfo, onClick: () -> Unit) {
             Store.ITCH -> R.drawable.ic_itch
             Store.EA -> R.drawable.ic_ea
             Store.MANUAL -> R.drawable.ic_manual
+            Store.UBISOFT -> R.drawable.ic_ubisoft
         }
         Icon(
             painter = painterResource(iconRes),

@@ -17,6 +17,7 @@ import com.zachvlat.gamelibrary.library.store.ea.EaStoreClient
 import com.zachvlat.gamelibrary.library.store.itch.ItchStoreClient
 import com.zachvlat.gamelibrary.library.store.manual.ManualStoreClient
 import com.zachvlat.gamelibrary.library.store.steam.SteamStoreClient
+import com.zachvlat.gamelibrary.library.store.ubisoft.UbisoftStoreClient
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpTimeout
@@ -43,7 +44,8 @@ class GameLibrary private constructor(
     val steam: SteamStoreClient,
     val itch: ItchStoreClient,
     val ea: EaStoreClient,
-    val manual: ManualStoreClient
+    val manual: ManualStoreClient,
+    val ubisoft: UbisoftStoreClient
 ) {
     private val npJson = Json { ignoreUnknownKeys = true }
 
@@ -110,7 +112,8 @@ class GameLibrary private constructor(
         Store.STEAM to steam,
         Store.ITCH to itch,
         Store.EA to ea,
-        Store.MANUAL to manual
+        Store.MANUAL to manual,
+        Store.UBISOFT to ubisoft
     )
 
     fun getClient(store: Store): StoreClient = allClients[store]
@@ -242,7 +245,8 @@ class GameLibrary private constructor(
                 steam = SteamStoreClient(httpClient, tokenStorage),
                 itch = ItchStoreClient(httpClient, tokenStorage),
                 ea = EaStoreClient(httpClient, tokenStorage),
-                manual = ManualStoreClient(cache)
+                manual = ManualStoreClient(cache),
+                ubisoft = UbisoftStoreClient(httpClient, tokenStorage)
             )
         }
     }

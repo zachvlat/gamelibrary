@@ -47,3 +47,8 @@ object EaConstants {
     const val ORDER_HISTORY_URL = "https://myaccount.ea.com/am/data/1/order-history?dateRange=ALL"
     const val STORE_BASE_URL = "https://www.ea.com/games"
 }
+
+object UbisoftConstants {
+    const val GAMES_ACTIVITY_URL = "https://www.ubisoft.com/en-gb/account/games-activity"
+    const val STORE_BASE_URL = "https://store.ubisoft.com"
+}

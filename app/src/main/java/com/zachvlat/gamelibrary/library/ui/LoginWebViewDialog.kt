@@ -47,12 +47,88 @@ fun LoginWebViewDialog(
     var codeHandled by remember { mutableStateOf(false) }
     var scrapedGamesJson by remember { mutableStateOf<String?>(null) }
     var eaScrapedJson by remember { mutableStateOf<String?>(null) }
+    var ubisoftScrapedJson by remember { mutableStateOf<String?>(null) }
     var jsInjected by remember { mutableStateOf(false) }
+
+    val ubisoftScrapeJs = """
+        (function() {
+            window.__ubisoftScrapingStarted = false;
+            async function expandAndScrape() {
+                // 1. Wait for game cards to appear (up to 20s)
+                for (var w = 0; w < 20; w++) {
+                    var c = document.querySelectorAll('[class*="GameCard_card"]').length;
+                    console.log('[UBISOFT-SCRAPE] wait ' + w + ': ' + c + ' cards');
+                    if (c > 0) break;
+                    await new Promise(function(r) { setTimeout(r, 1000); });
+                }
+                // 2. Repeatedly click "See more" until gone or "See less" appears (max 30 clicks)
+                for (var i = 0; i < 30; i++) {
+                    var btn = null;
+                    var buttons = document.querySelectorAll('button');
+                    for (var j = 0; j < buttons.length; j++) {
+                        var txt = buttons[j].textContent.trim().toLowerCase();
+                        if (txt === 'see more' || txt === 'show more' || txt === 'load more' || txt === 'view more') {
+                            btn = buttons[j];
+                            break;
+                        }
+                    }
+                    if (!btn) {
+                        var allBtns = document.querySelectorAll('button, [role="button"]');
+                        for (var k = 0; k < allBtns.length; k++) {
+                            var bt = allBtns[k].textContent.trim().toLowerCase();
+                            if (bt.includes('more') || bt.includes('load') || bt.includes('expand')) {
+                                btn = allBtns[k];
+                                console.log('[UBISOFT-SCRAPE] fallback: ' + bt);
+                                break;
+                            }
+                        }
+                    }
+                    if (!btn) break;
+                    var cardBefore = document.querySelectorAll('[class*="GameCard_card"]').length;
+                    btn.click();
+                    await new Promise(function(r) { setTimeout(r, 2000); });
+                    var cardAfter = document.querySelectorAll('[class*="GameCard_card"]').length;
+                    console.log('[UBISOFT-SCRAPE] clicked, cards: ' + cardBefore + ' -> ' + cardAfter);
+                }
+                // 3. Scrape all visible cards
+                var games = [];
+                document.querySelectorAll('[class*="GameCard_card"]').forEach(function(card) {
+                    var nameEl = card.querySelector('[class*="GameCard_mobileHeading"]');
+                    var imgEl = card.querySelector('img');
+                    var stats = card.querySelectorAll('[class*="GameCard_gameCard"]');
+                    var playTime = '';
+                    var lastPlayed = '';
+                    var platform = '';
+                    stats.forEach(function(stat) {
+                        var label = stat.querySelector('p:first-child');
+                        var value = stat.querySelector('[class*="GameCard_mobileHeading"]');
+                        if (label && value) {
+                            var labelText = label.textContent.trim();
+                            var valueText = value.textContent.trim();
+                            if (labelText === 'Played time') playTime = valueText;
+                            else if (labelText === 'Last played') lastPlayed = valueText;
+                            else if (labelText === 'Platform') platform = valueText;
+                        }
+                    });
+                    var name = nameEl ? nameEl.textContent.trim() : '';
+                    var cover = imgEl ? imgEl.src : '';
+                    if (name) {
+                        games.push({ name: name, cover: cover, playTime: playTime, lastPlayed: lastPlayed, platform: platform });
+                    }
+                });
+                console.log('[UBISOFT-SCRAPE] scraped ' + games.length + ' games');
+                if (games.length > 0) {
+                    AndroidUbisoftBridge.onGamesScraped(JSON.stringify(games));
+                }
+            }
+            expandAndScrape();
+        })();
+    """.trimIndent()
 
     fun handleScrapedJson(json: String) {
         if (codeHandled) return
         codeHandled = true
-        if (store == Store.ITCH || store == Store.EA) {
+        if (store == Store.ITCH || store == Store.EA || store == Store.UBISOFT) {
             CookieManager.getInstance().flush()
         }
         onDismiss()
@@ -68,6 +144,13 @@ fun LoginWebViewDialog(
 
     LaunchedEffect(eaScrapedJson) {
         val json = eaScrapedJson
+        if (json != null && !codeHandled) {
+            handleScrapedJson(json)
+        }
+    }
+
+    LaunchedEffect(ubisoftScrapedJson) {
+        val json = ubisoftScrapedJson
         if (json != null && !codeHandled) {
             handleScrapedJson(json)
         }
@@ -131,6 +214,15 @@ fun LoginWebViewDialog(
                                         }
                                         addJavascriptInterface(EaBridge(), "AndroidEaBridge")
                                     }
+                                    Store.UBISOFT -> {
+                                        class UbisoftBridge {
+                                            @JavascriptInterface
+                                            fun onGamesScraped(json: String) {
+                                                ubisoftScrapedJson = json
+                                            }
+                                        }
+                                        addJavascriptInterface(UbisoftBridge(), "AndroidUbisoftBridge")
+                                    }
                                     else -> {}
                                 }
 
@@ -150,6 +242,9 @@ fun LoginWebViewDialog(
                                                 }
                                             }
                                             Store.EA -> {
+                                                jsInjected = false
+                                            }
+                                            Store.UBISOFT -> {
                                                 jsInjected = false
                                             }
                                             else -> {}
@@ -209,10 +304,18 @@ fun LoginWebViewDialog(
                                             """.trimIndent()
                                             view.evaluateJavascript(eaJs, null)
                                         }
+                                        if (store == Store.UBISOFT && url.startsWith("https://www.ubisoft.com/en-gb/account/games-activity") && !jsInjected) {
+                                            jsInjected = true
+                                            view.evaluateJavascript(ubisoftScrapeJs, null)
+                                        }
                                         tryHandleUrl(url, view)
                                     }
 
                                     override fun doUpdateVisitedHistory(view: WebView, url: String, isReload: Boolean) {
+                                        if (store == Store.UBISOFT && url.startsWith("https://www.ubisoft.com/en-gb/account/games-activity") && !jsInjected) {
+                                            jsInjected = true
+                                            view.evaluateJavascript(ubisoftScrapeJs, null)
+                                        }
                                         tryHandleUrl(url, view)
                                     }
 
@@ -273,6 +376,7 @@ fun LoginWebViewDialog(
                                             Store.ITCH -> null
                                             Store.EA -> null
                                             Store.MANUAL -> null
+                                            Store.UBISOFT -> null
                                         }
                                     }
                                 }

@@ -10,5 +10,6 @@ enum class Store {
     STEAM,
     ITCH,
     EA,
-    MANUAL
+    MANUAL,
+    UBISOFT
 }

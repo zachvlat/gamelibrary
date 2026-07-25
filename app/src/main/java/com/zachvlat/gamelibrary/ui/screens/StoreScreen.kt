@@ -91,6 +91,7 @@ fun StoreScreen(
     var showItchAutoSyncDialog by remember { mutableStateOf(false) }
     var itchAutoSyncUrl by remember { mutableStateOf("") }
     var showEaAutoSyncDialog by remember { mutableStateOf(false) }
+    var showUbisoftAutoSyncDialog by remember { mutableStateOf(false) }
     var showSteamSetupDialog by remember { mutableStateOf(false) }
     var steamApiKeyInput by remember { mutableStateOf("") }
     var steamProfileUrlInput by remember { mutableStateOf("") }
@@ -243,6 +244,9 @@ fun StoreScreen(
                                     }
                                     Store.EA -> {
                                         showEaAutoSyncDialog = true
+                                    }
+                                    Store.UBISOFT -> {
+                                        showUbisoftAutoSyncDialog = true
                                     }
                                     else -> {
                                         statusMessage = null
@@ -437,6 +441,34 @@ fun StoreScreen(
                     isSyncing = true
                     try {
                         val ok = library.ea.completeLogin(json)
+                        if (ok) {
+                            val result = library.getGamesForStore(store, forceRefresh = true)
+                            onGamesUpdated(result)
+                        } else {
+                            statusMessage = "Sync failed — please log in again"
+                        }
+                    } catch (e: Exception) {
+                        statusMessage = "Error: ${e.message}"
+                    }
+                    isSyncing = false
+                }
+            }
+        )
+    }
+
+    if (showUbisoftAutoSyncDialog) {
+        LoginWebViewDialog(
+            store = Store.UBISOFT,
+            authUrl = "https://www.ubisoft.com/en-gb/account/games-activity",
+            onDismiss = {
+                showUbisoftAutoSyncDialog = false
+            },
+            onCodeReceived = { json ->
+                showUbisoftAutoSyncDialog = false
+                scope.launch {
+                    isSyncing = true
+                    try {
+                        val ok = library.ubisoft.completeLogin(json)
                         if (ok) {
                             val result = library.getGamesForStore(store, forceRefresh = true)
                             onGamesUpdated(result)

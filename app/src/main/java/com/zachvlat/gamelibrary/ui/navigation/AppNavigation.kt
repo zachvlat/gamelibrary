@@ -70,18 +70,20 @@ private sealed class DrawerItem(
     data object Itch : DrawerItem("itch", "itch.io", { Icon(painterResource(R.drawable.ic_itch), null, Modifier.size(24.dp)) })
     data object Ea : DrawerItem("ea", "EA", { Icon(painterResource(R.drawable.ic_ea), null, Modifier.size(24.dp)) })
     data object Manual : DrawerItem("manual", "Manual", { Icon(Icons.Default.Edit, null) })
+    data object Ubisoft : DrawerItem("ubisoft", "Ubisoft", { Icon(painterResource(R.drawable.ic_ubisoft), null, Modifier.size(24.dp)) })
     data object Settings : DrawerItem("settings", "Settings", { Icon(Icons.Default.Settings, null) })
 }
 
 private val drawerItems = listOf(
     DrawerItem.Home,
+    DrawerItem.Manual,
+    DrawerItem.Ubisoft,
     DrawerItem.Gog,
     DrawerItem.Epic,
     DrawerItem.Amazon,
     DrawerItem.Steam,
     DrawerItem.Itch,
-    DrawerItem.Ea,
-    DrawerItem.Manual
+    DrawerItem.Ea
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,6 +102,7 @@ fun AppNavigation(library: GameLibrary) {
     var itchGames by remember { mutableStateOf<List<GameInfo>>(emptyList()) }
     var eaGames by remember { mutableStateOf<List<GameInfo>>(emptyList()) }
     var manualGames by remember { mutableStateOf<List<GameInfo>>(emptyList()) }
+    var ubisoftGames by remember { mutableStateOf<List<GameInfo>>(emptyList()) }
     var refreshKey by remember { mutableStateOf(0) }
 
     LaunchedEffect(refreshKey) {
@@ -115,6 +118,7 @@ fun AppNavigation(library: GameLibrary) {
                         Store.ITCH -> itchGames = cached
                         Store.EA -> eaGames = cached
                         Store.MANUAL -> manualGames = cached
+                        Store.UBISOFT -> ubisoftGames = cached
                     }
                 }
             } catch (_: Exception) { }
@@ -128,7 +132,8 @@ fun AppNavigation(library: GameLibrary) {
         Store.STEAM to steamGames,
         Store.ITCH to itchGames,
         Store.EA to eaGames,
-        Store.MANUAL to manualGames
+        Store.MANUAL to manualGames,
+        Store.UBISOFT to ubisoftGames
     )
 
     val isGameDetail = currentRoute.startsWith("game/") || currentRoute.startsWith("manual-")
@@ -142,6 +147,7 @@ fun AppNavigation(library: GameLibrary) {
         currentRoute == "itch" -> "itch.io"
         currentRoute == "ea" -> "EA"
         currentRoute == "manual" -> "Manual"
+        currentRoute == "ubisoft" -> "Ubisoft Connect"
         currentRoute == "settings" -> "Settings"
         else -> "GameShelf"
     }
@@ -344,6 +350,15 @@ fun AppNavigation(library: GameLibrary) {
                             Text("Game not found")
                         }
                     }
+                }
+                composable(DrawerItem.Ubisoft.route) {
+                    StoreScreen(
+                        store = Store.UBISOFT,
+                        library = library,
+                        games = ubisoftGames,
+                        onGamesUpdated = { ubisoftGames = it },
+                        onGameClick = onGameClick
+                    )
                 }
                 composable(DrawerItem.Settings.route) {
                     SettingsScreen(
