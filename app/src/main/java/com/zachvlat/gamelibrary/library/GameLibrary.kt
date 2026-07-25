@@ -178,11 +178,13 @@ class GameLibrary private constructor(
     }
 
     suspend fun addManualGame(game: GameInfo) {
-        cache.cacheGames(Store.MANUAL, listOf(game))
+        val existing = cache.getCachedGames(Store.MANUAL, ttlMs = Long.MAX_VALUE) ?: emptyList()
+        cache.cacheGames(Store.MANUAL, existing + game)
     }
 
     suspend fun updateManualGame(game: GameInfo) {
-        cache.cacheGames(Store.MANUAL, listOf(game))
+        val existing = cache.getCachedGames(Store.MANUAL, ttlMs = Long.MAX_VALUE) ?: emptyList()
+        cache.cacheGames(Store.MANUAL, existing.filter { it.appName != game.appName } + game)
     }
 
     suspend fun deleteManualGame(appName: String) {

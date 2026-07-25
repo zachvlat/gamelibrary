@@ -69,7 +69,7 @@ private sealed class DrawerItem(
     data object Steam : DrawerItem("steam", "Steam", { Icon(painterResource(R.drawable.ic_steam), null, Modifier.size(24.dp)) })
     data object Itch : DrawerItem("itch", "itch.io", { Icon(painterResource(R.drawable.ic_itch), null, Modifier.size(24.dp)) })
     data object Ea : DrawerItem("ea", "EA", { Icon(painterResource(R.drawable.ic_ea), null, Modifier.size(24.dp)) })
-    data object Manual : DrawerItem("manual", "Manual", { Icon(Icons.Default.Edit, null) })
+    data object Manual : DrawerItem("manual", "Manual", { Icon(painterResource(R.drawable.ic_manual), null, Modifier.size(24.dp)) })
     data object Ubisoft : DrawerItem("ubisoft", "Ubisoft", { Icon(painterResource(R.drawable.ic_ubisoft), null, Modifier.size(24.dp)) })
     data object Settings : DrawerItem("settings", "Settings", { Icon(Icons.Default.Settings, null) })
 }
