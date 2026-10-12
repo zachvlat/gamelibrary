@@ -14,7 +14,6 @@
         android:roundIcon="@mipmap/gameshelf"
         android:supportsRtl="true"
         android:theme="@style/Theme.GameLibrary"
-        android:usesCleartextTraffic="true"
         tools:targetApi="36">
         <activity
             android:name=".MainActivity"

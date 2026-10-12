@@ -1,5 +1,7 @@
-Is an app to store your games from multiple sources that you have on several online stores such as GOG, Epic etc.
+GameShelf aggregates your owned game libraries from Epic Games Store, GOG, Amazon Gaming, Steam and itch.io into one place.
 
-Visit https://github.com/zachvlat/gamelibrary/blob/android-native-nonplaynite/README.md for more information.
+Log in once via in-app WebView OAuth, browse all your games offline thanks to local caching with 7-day TTL. Optional IGDB enrichment adds covers, descriptions and genres.
 
-Changelogs: https://github.com/zachvlat/gamelibrary/blob/android-native-nonplaynite/fastlane/metadata/android/en-US/changelogs
+Built with Jetpack Compose and Material 3 dynamic colors. No ads, no tracking, fully open source.
+
+Note: this app connects to proprietary store services (Epic, GOG, Amazon, Steam, itch.io, IGDB) and requires accounts on those services to sync libraries.
